@@ -9,10 +9,7 @@ import '../../domain/models/chat_message.dart';
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
 
-  const MessageBubble({
-    super.key,
-    required this.message,
-  });
+  const MessageBubble({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +31,10 @@ class MessageBubble extends StatelessWidget {
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: ResponsiveHelper.isDesktop(context)
-                    ? MediaQuery.of(context).size.width * 0.65
-                    : double.infinity,
+                maxWidth:
+                    ResponsiveHelper.isDesktop(context)
+                        ? MediaQuery.of(context).size.width * 0.65
+                        : double.infinity,
               ),
               child: _buildBubble(context),
             ),
@@ -69,7 +67,9 @@ class MessageBubble extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(AppConstants.primaryColorValue).withOpacity(0.3),
+              color: const Color(
+                AppConstants.primaryColorValue,
+              ).withOpacity(0.3),
               blurRadius: 15,
               offset: const Offset(0, 4),
               spreadRadius: 0,
@@ -113,6 +113,8 @@ class MessageBubble extends StatelessWidget {
       );
     } else {
       // Bot message with glassmorphism effect
+      final theme = Theme.of(context);
+
       return Container(
         padding: padding,
         decoration: BoxDecoration(
@@ -151,7 +153,9 @@ class MessageBubble extends StatelessWidget {
             Text(
               DateFormatter.formatTime(message.timestamp),
               style: TextStyle(
-                color: const Color(AppConstants.textColorDarkValue).withOpacity(0.6),
+                color: const Color(
+                  AppConstants.textColorDarkValue,
+                ).withOpacity(0.6),
                 fontSize: ResponsiveHelper.isMobile(context) ? 10 : 11,
                 fontWeight: FontWeight.w300,
               ),
@@ -171,7 +175,9 @@ class MessageBubble extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(AppConstants.secondaryColorValue).withOpacity(0.4),
+            color: const Color(
+              AppConstants.secondaryColorValue,
+            ).withOpacity(0.4),
             blurRadius: 12,
             spreadRadius: 2,
           ),
@@ -200,11 +206,7 @@ class MessageBubble extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        Icons.person_rounded,
-        color: Colors.white,
-        size: size * 0.6,
-      ),
+      child: Icon(Icons.person_rounded, color: Colors.white, size: size * 0.6),
     );
   }
 }

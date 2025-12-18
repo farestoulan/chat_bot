@@ -12,6 +12,7 @@ class EmptyChatState extends StatelessWidget {
     final isMobile = ResponsiveHelper.isMobile(context);
     final iconSize = isMobile ? 140.0 : 180.0;
     final iconInnerSize = isMobile ? 70.0 : 90.0;
+    final theme = Theme.of(context);
 
     return Center(
       child: Padding(
@@ -25,13 +26,19 @@ class EmptyChatState extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    const Color(AppConstants.primaryColorValue).withOpacity(0.2),
-                    const Color(AppConstants.secondaryColorValue).withOpacity(0.1),
+                    const Color(
+                      AppConstants.primaryColorValue,
+                    ).withOpacity(0.2),
+                    const Color(
+                      AppConstants.secondaryColorValue,
+                    ).withOpacity(0.1),
                   ],
                 ),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(AppConstants.primaryColorValue).withOpacity(0.3),
+                  color: const Color(
+                    AppConstants.primaryColorValue,
+                  ).withOpacity(0.3),
                   width: 2,
                 ),
               ),
@@ -43,7 +50,8 @@ class EmptyChatState extends StatelessWidget {
             ),
             SizedBox(height: isMobile ? 32 : 40),
             ShaderMask(
-              shaderCallback: (bounds) => AppTheme.primaryGradient.createShader(bounds),
+              shaderCallback:
+                  (bounds) => AppTheme.primaryGradient.createShader(bounds),
               child: Text(
                 'Start a conversation',
                 style: TextStyle(
@@ -59,7 +67,7 @@ class EmptyChatState extends StatelessWidget {
               'Type a message below to begin chatting',
               style: TextStyle(
                 fontSize: isMobile ? 16 : 18,
-                color: const Color(AppConstants.textColorDarkValue).withOpacity(0.6),
+                color: theme.colorScheme.onBackground.withOpacity(0.6),
                 fontWeight: FontWeight.w300,
               ),
               textAlign: TextAlign.center,
@@ -72,7 +80,9 @@ class EmptyChatState extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(AppConstants.primaryColorValue).withOpacity(0.4),
+                    color: const Color(
+                      AppConstants.primaryColorValue,
+                    ).withOpacity(0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -81,7 +91,11 @@ class EmptyChatState extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'AI Powered',

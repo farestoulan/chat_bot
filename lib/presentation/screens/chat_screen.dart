@@ -99,8 +99,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(AppConstants.backgroundColorValue),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: const ChatAppBar(),
       body: Container(
         decoration: BoxDecoration(
@@ -108,8 +110,8 @@ class _ChatScreenState extends State<ChatScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(AppConstants.backgroundColorValue),
-              const Color(AppConstants.surfaceColorValue).withOpacity(0.3),
+              theme.scaffoldBackgroundColor,
+              theme.colorScheme.surface.withOpacity(0.3),
             ],
           ),
         ),

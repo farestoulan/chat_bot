@@ -19,14 +19,15 @@ class MessageInputField extends StatelessWidget {
     final padding = ResponsiveHelper.getInputPadding(context);
     final maxWidth = ResponsiveHelper.getMaxChatWidth(context);
     final isMobile = ResponsiveHelper.isMobile(context);
+    final theme = Theme.of(context);
 
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: const Color(AppConstants.surfaceColorValue),
+        color: theme.colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: const Color(AppConstants.primaryColorValue).withOpacity(0.1),
+            color: theme.colorScheme.primary.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -41,14 +42,10 @@ class MessageInputField extends StatelessWidget {
       child: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth ?? double.infinity,
-            ),
+            constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
             child: Row(
               children: [
-                Expanded(
-                  child: _buildTextField(context),
-                ),
+                Expanded(child: _buildTextField(context)),
                 SizedBox(width: isMobile ? 12 : 16),
                 _buildSendButton(context),
               ],
@@ -62,13 +59,14 @@ class MessageInputField extends StatelessWidget {
   Widget _buildTextField(BuildContext context) {
     final borderRadius = ResponsiveHelper.getBorderRadius(context);
     final isMobile = ResponsiveHelper.isMobile(context);
+    final theme = Theme.of(context);
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(AppConstants.backgroundColorValue),
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: const Color(AppConstants.primaryColorValue).withOpacity(0.2),
+          color: theme.colorScheme.primary.withOpacity(0.2),
           width: 1.5,
         ),
         boxShadow: [
@@ -82,13 +80,13 @@ class MessageInputField extends StatelessWidget {
       child: TextField(
         controller: controller,
         style: TextStyle(
-          color: const Color(AppConstants.textColorDarkValue),
+          color: theme.colorScheme.onBackground,
           fontSize: isMobile ? 15 : 16,
         ),
         decoration: InputDecoration(
           hintText: 'Type a message...',
           hintStyle: TextStyle(
-            color: const Color(AppConstants.textColorDarkValue).withOpacity(0.4),
+            color: theme.colorScheme.onBackground.withOpacity(0.4),
             fontSize: isMobile ? 15 : 16,
           ),
           border: InputBorder.none,
@@ -106,9 +104,10 @@ class MessageInputField extends StatelessWidget {
 
   Widget _buildSendButton(BuildContext context) {
     final isMobile = ResponsiveHelper.isMobile(context);
-    final buttonSize = isMobile
-        ? AppConstants.sendButtonSize
-        : AppConstants.sendButtonSize + 4;
+    final buttonSize =
+        isMobile
+            ? AppConstants.sendButtonSize
+            : AppConstants.sendButtonSize + 4;
 
     return Container(
       width: buttonSize,
