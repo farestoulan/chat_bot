@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/utils/responsive_helper.dart';
-import '../../core/theme/app_theme.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
+import '../../../core/theme/app_theme.dart';
 import '../cubit/theme_cubit.dart';
 
 /// Custom app bar for the chat screen

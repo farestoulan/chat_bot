@@ -16,7 +16,7 @@ class AppConstants {
   static const String botName = 'ChatBot Assistant';
   static const String botStatus = 'Online';
   static const String welcomeMessage =
-      "Hello! 👋 I'm your friendly chatbot. How can I help you today?";
+      "Hello! 👋 I'm your friendly chatbot. How can I help you today? \n\n مرحباً! 👋 أنا روبوت الدردشة الودود الخاص بك. كيف يمكنني مساعدتك اليوم؟";
 
   // Timing
   static const int botResponseDelayMs = 800;
@@ -31,4 +31,3 @@ class AppConstants {
   static const double sendButtonSize = 48.0;
   static const double inputBorderRadius = 24.0;
 }
-

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/utils/responsive_helper.dart';
-import '../../core/theme/app_theme.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// Widget displayed when there are no messages in the chat
 class EmptyChatState extends StatelessWidget {

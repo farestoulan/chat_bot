@@ -1,4 +1,4 @@
-import '../models/chat_message.dart';
+import '../../data/models/chat_message.dart';
 
 /// Repository interface for chat operations
 /// This follows the dependency inversion principle
@@ -9,4 +9,3 @@ abstract class ChatRepository {
   /// Gets the welcome message from the bot
   ChatMessage getWelcomeMessage();
 }
-

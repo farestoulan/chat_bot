@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/models/chat_message.dart';
+import '../../data/models/chat_message.dart';
 import '../../domain/repositories/chat_repository.dart';
 import 'chat_state.dart';
 
@@ -17,7 +17,7 @@ class ChatCubit extends Cubit<ChatState> {
       final welcomeMessage = _repository.getWelcomeMessage();
       emit(ChatLoaded([welcomeMessage]));
     } catch (e) {
-      emit(ChatError('Failed to initialize chat: ${e.toString()}'));
+      emit(ChatError('Failed to initialize chat: ${e.toString()}', []));
     }
   }
 
@@ -26,9 +26,15 @@ class ChatCubit extends Cubit<ChatState> {
     if (userMessage.trim().isEmpty) return;
 
     final currentState = state;
-    if (currentState is! ChatLoaded) return;
+    if (currentState is! ChatLoaded && currentState is! ChatLoading) return;
 
     try {
+      // Get current messages list
+      final currentMessages =
+          currentState is ChatLoaded
+              ? currentState.messages
+              : (currentState as ChatLoading).messages;
+
       // Add user message immediately
       final userMsg = ChatMessage(
         id: _generateId(),
@@ -37,15 +43,25 @@ class ChatCubit extends Cubit<ChatState> {
         timestamp: DateTime.now(),
       );
 
-      final updatedMessages = [...currentState.messages, userMsg];
+      final updatedMessages = [...currentMessages, userMsg];
       emit(ChatLoaded(updatedMessages));
+
+      // Emit loading state
+      emit(ChatLoading(updatedMessages));
 
       // Get bot response
       final botResponse = await _repository.sendMessage(userMessage);
       final finalMessages = [...updatedMessages, botResponse];
       emit(ChatLoaded(finalMessages));
     } catch (e) {
-      emit(ChatError('Failed to send message: ${e.toString()}'));
+      // On error, keep the messages (including user's message) and show error
+      final currentMessages =
+          currentState is ChatLoaded
+              ? currentState.messages
+              : (currentState as ChatLoading).messages;
+      emit(
+        ChatError('Failed to send message: ${e.toString()}', currentMessages),
+      );
     }
   }
 
@@ -53,4 +69,3 @@ class ChatCubit extends Cubit<ChatState> {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 }
-

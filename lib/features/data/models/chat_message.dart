@@ -39,10 +39,6 @@ class ChatMessage {
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        text.hashCode ^
-        isUser.hashCode ^
-        timestamp.hashCode;
+    return id.hashCode ^ text.hashCode ^ isUser.hashCode ^ timestamp.hashCode;
   }
 }
-

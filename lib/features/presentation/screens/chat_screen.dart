@@ -7,8 +7,9 @@ import '../widgets/empty_chat_state.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/message_input_field.dart';
 import '../widgets/background_logo.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/utils/responsive_helper.dart';
+import '../widgets/typing_indicator.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
 
 /// Main chat screen widget
 class ChatScreen extends StatefulWidget {
@@ -52,7 +53,10 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  Widget _buildResponsiveChatContent(ChatLoaded state) {
+  Widget _buildResponsiveChatContent(
+    ChatLoaded state, {
+    bool isLoading = false,
+  }) {
     final isEmpty = state.messages.isEmpty;
 
     return Stack(
@@ -77,8 +81,12 @@ class _ChatScreenState extends State<ChatScreen> {
                             padding: ResponsiveHelper.getResponsivePadding(
                               context,
                             ),
-                            itemCount: state.messages.length,
+                            itemCount:
+                                state.messages.length + (isLoading ? 1 : 0),
                             itemBuilder: (context, index) {
+                              if (isLoading && index == state.messages.length) {
+                                return const TypingIndicator();
+                              }
                               return MessageBubble(
                                 message: state.messages[index],
                               );
@@ -117,7 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         child: BlocConsumer<ChatCubit, ChatState>(
           listener: (context, state) {
-            if (state is ChatLoaded) {
+            if (state is ChatLoaded || state is ChatLoading) {
               _scrollToBottom();
             }
           },
@@ -127,6 +135,23 @@ class _ChatScreenState extends State<ChatScreen> {
             }
 
             if (state is ChatError) {
+              // Show error as snackbar and display messages if available
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
+              });
+
+              // If there are messages, show them; otherwise show error screen
+              if (state.messages.isNotEmpty) {
+                return _buildResponsiveChatContent(ChatLoaded(state.messages));
+              }
+
               return Center(
                 child: Padding(
                   padding: ResponsiveHelper.getResponsivePadding(context),
@@ -151,6 +176,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     ],
                   ),
                 ),
+              );
+            }
+
+            if (state is ChatLoading) {
+              return _buildResponsiveChatContent(
+                ChatLoaded(state.messages),
+                isLoading: true,
               );
             }
 

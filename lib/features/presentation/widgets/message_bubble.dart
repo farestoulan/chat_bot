@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/utils/date_formatter.dart';
-import '../../core/utils/responsive_helper.dart';
-import '../../core/theme/app_theme.dart';
-import '../../domain/models/chat_message.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/responsive_helper.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../data/models/chat_message.dart';
 
 /// Widget for displaying a chat message bubble
 class MessageBubble extends StatelessWidget {
@@ -113,8 +113,6 @@ class MessageBubble extends StatelessWidget {
       );
     } else {
       // Bot message with glassmorphism effect
-      final theme = Theme.of(context);
-
       return Container(
         padding: padding,
         decoration: BoxDecoration(

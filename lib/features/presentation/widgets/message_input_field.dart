@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_constants.dart';
-import '../../core/utils/responsive_helper.dart';
-import '../../core/theme/app_theme.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// Widget for the message input field at the bottom of the chat
 class MessageInputField extends StatelessWidget {

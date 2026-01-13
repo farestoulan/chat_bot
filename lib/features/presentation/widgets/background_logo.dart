@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/utils/responsive_helper.dart';
+import '../../../core/utils/responsive_helper.dart';
 
 /// Widget for displaying the SINGLECLIC logo as background
 class BackgroundLogo extends StatelessWidget {
