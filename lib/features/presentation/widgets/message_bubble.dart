@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/responsive_helper.dart';
@@ -6,10 +7,28 @@ import '../../../core/theme/app_theme.dart';
 import '../../data/models/chat_message.dart';
 
 /// Widget for displaying a chat message bubble
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends StatefulWidget {
   final ChatMessage message;
 
   const MessageBubble({super.key, required this.message});
+
+  @override
+  State<MessageBubble> createState() => _MessageBubbleState();
+}
+
+class _MessageBubbleState extends State<MessageBubble> {
+  bool _isHovered = false;
+
+  static final _arabicRegex = RegExp(
+    r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]',
+  );
+
+  bool _isArabicText(String text) {
+    final stripped = text.replaceAll(RegExp(r'\s+'), '');
+    if (stripped.isEmpty) return false;
+    final arabicCount = _arabicRegex.allMatches(stripped).length;
+    return arabicCount > stripped.length / 2;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,33 +36,39 @@ class MessageBubble extends StatelessWidget {
     final avatarSize = ResponsiveHelper.getAvatarSize(context);
     final spacing = isMobile ? 10.0 : 14.0;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: isMobile ? 18 : 22),
-      child: Row(
-        mainAxisAlignment:
-            message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!message.isUser) ...[
-            _buildBotAvatar(context, avatarSize),
-            SizedBox(width: spacing),
-          ],
-          Flexible(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth:
-                    ResponsiveHelper.isDesktop(context)
-                        ? MediaQuery.of(context).size.width * 0.65
-                        : double.infinity,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: isMobile ? 18 : 22),
+        child: Row(
+          mainAxisAlignment:
+              widget.message.isUser
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (!widget.message.isUser) ...[
+              _buildBotAvatar(context, avatarSize),
+              SizedBox(width: spacing),
+            ],
+            Flexible(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth:
+                      ResponsiveHelper.isDesktop(context)
+                          ? MediaQuery.of(context).size.width * 0.65
+                          : double.infinity,
+                ),
+                child: _buildBubble(context),
               ),
-              child: _buildBubble(context),
             ),
-          ),
-          if (message.isUser) ...[
-            SizedBox(width: spacing),
-            _buildUserAvatar(context, avatarSize),
+            if (widget.message.isUser) ...[
+              SizedBox(width: spacing),
+              _buildUserAvatar(context, avatarSize),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -52,9 +77,9 @@ class MessageBubble extends StatelessWidget {
     final padding = ResponsiveHelper.getMessagePadding(context);
     final fontSize = ResponsiveHelper.getMessageFontSize(context);
     final borderRadius = ResponsiveHelper.isMobile(context) ? 24.0 : 28.0;
+    final isArabic = _isArabicText(widget.message.text);
 
-    if (message.isUser) {
-      // User message with gradient
+    if (widget.message.isUser) {
       return Container(
         padding: padding,
         decoration: BoxDecoration(
@@ -77,10 +102,13 @@ class MessageBubble extends StatelessWidget {
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
-              message.text,
+            SelectableText(
+              widget.message.text,
+              textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+              textAlign: isArabic ? TextAlign.right : TextAlign.left,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: fontSize,
@@ -99,20 +127,26 @@ class MessageBubble extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  DateFormatter.formatTime(message.timestamp),
+                  DateFormatter.formatTime(widget.message.timestamp),
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
                     fontSize: ResponsiveHelper.isMobile(context) ? 10 : 11,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
+                if (_isHovered) ...[
+                  const SizedBox(width: 8),
+                  _buildCopyButton(
+                    context,
+                    iconColor: Colors.white.withOpacity(0.7),
+                  ),
+                ],
               ],
             ),
           ],
         ),
       );
     } else {
-      // Bot message with glassmorphism effect
       return Container(
         padding: padding,
         decoration: BoxDecoration(
@@ -136,10 +170,13 @@ class MessageBubble extends StatelessWidget {
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
-              message.text,
+            SelectableText(
+              widget.message.text,
+              textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+              textAlign: isArabic ? TextAlign.right : TextAlign.left,
               style: TextStyle(
                 color: const Color(AppConstants.textColorDarkValue),
                 fontSize: fontSize,
@@ -148,20 +185,57 @@ class MessageBubble extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text(
-              DateFormatter.formatTime(message.timestamp),
-              style: TextStyle(
-                color: const Color(
-                  AppConstants.textColorDarkValue,
-                ).withOpacity(0.6),
-                fontSize: ResponsiveHelper.isMobile(context) ? 10 : 11,
-                fontWeight: FontWeight.w300,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  DateFormatter.formatTime(widget.message.timestamp),
+                  style: TextStyle(
+                    color: const Color(
+                      AppConstants.textColorDarkValue,
+                    ).withOpacity(0.6),
+                    fontSize: ResponsiveHelper.isMobile(context) ? 10 : 11,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+                if (_isHovered) ...[
+                  const SizedBox(width: 8),
+                  _buildCopyButton(
+                    context,
+                    iconColor: const Color(
+                      AppConstants.textColorDarkValue,
+                    ).withOpacity(0.5),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
       );
     }
+  }
+
+  Widget _buildCopyButton(BuildContext context, {required Color iconColor}) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: widget.message.text));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Message copied'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 1),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: Icon(Icons.copy_rounded, size: 14, color: iconColor),
+      ),
+    );
   }
 
   Widget _buildBotAvatar(BuildContext context, double size) {

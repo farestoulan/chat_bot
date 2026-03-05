@@ -7,11 +7,13 @@ import '../../../core/theme/app_theme.dart';
 class MessageInputField extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
+  final bool isLoading;
 
   const MessageInputField({
     super.key,
     required this.controller,
     required this.onSend,
+    this.isLoading = false,
   });
 
   @override
@@ -97,7 +99,7 @@ class MessageInputField extends StatelessWidget {
         ),
         maxLines: null,
         textInputAction: TextInputAction.send,
-        onSubmitted: (_) => onSend(),
+        onSubmitted: isLoading ? null : (_) => onSend(),
       ),
     );
   }
@@ -128,12 +130,24 @@ class MessageInputField extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(buttonSize / 2),
-          onTap: onSend,
-          child: Icon(
-            Icons.send_rounded,
-            color: Colors.white,
-            size: isMobile ? 20 : 22,
-          ),
+          onTap: isLoading ? null : onSend,
+          child: isLoading
+              ? Padding(
+                  padding: EdgeInsets.all(isMobile ? 12 : 14),
+                  child: SizedBox(
+                    width: isMobile ? 20 : 22,
+                    height: isMobile ? 20 : 22,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  ),
+                )
+              : Icon(
+                  Icons.send_rounded,
+                  color: Colors.white,
+                  size: isMobile ? 20 : 22,
+                ),
         ),
       ),
     );

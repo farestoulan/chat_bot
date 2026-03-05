@@ -40,4 +40,15 @@ abstract class ApiConsumer {
     Options? options,
     bool formDataIsEnabled = false,
   });
+
+  Future<void> postStream(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    bool formDataIsEnabled = false,
+    required Function(String chunk) onData,
+    required Function() onDone,
+    required Function(dynamic error) onError,
+  });
 }

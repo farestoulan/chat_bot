@@ -1,11 +1,13 @@
 import '../../data/models/chat_message.dart';
 
-/// Repository interface for chat operations
-/// This follows the dependency inversion principle
 abstract class ChatRepository {
-  /// Sends a user message and returns a bot response
-  Future<ChatMessage> sendMessage(String userMessage);
+  Future<void> sendMessageStream(
+    String userMessage, {
+    Map<String, dynamic>? userInfo,
+    required Function(String token) onData,
+    required Function() onDone,
+    required Function(dynamic error) onError,
+  });
 
-  /// Gets the welcome message from the bot
   ChatMessage getWelcomeMessage();
 }

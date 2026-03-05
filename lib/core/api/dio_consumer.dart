@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:chat_bot/core/api/api_consumer.dart';
@@ -21,9 +24,10 @@ class DioConsumer implements ApiConsumer {
         path,
         queryParameters: queryParameters,
         options: Options(
-          responseType: isResponseTypeHtml == true
-              ? ResponseType.plain
-              : ResponseType.json,
+          responseType:
+              isResponseTypeHtml == true
+                  ? ResponseType.plain
+                  : ResponseType.json,
         ),
       );
       return Right(response.data);
@@ -126,6 +130,52 @@ class DioConsumer implements ApiConsumer {
     }
   }
 
+  @override
+  Future<void> postStream(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    bool formDataIsEnabled = false,
+    required Function(String chunk) onData,
+    required Function() onDone,
+    required Function(dynamic error) onError,
+  }) async {
+    try {
+      final response = await client.post(
+        path,
+        data: formDataIsEnabled ? FormData.fromMap(body ?? {}) : body,
+        queryParameters: queryParameters,
+        options: Options(
+          responseType: ResponseType.stream,
+          headers: {
+            ...?options?.headers,
+            'Accept': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        ),
+      );
+
+      final ResponseBody responseBody = response.data;
+
+      responseBody.stream.listen(
+        (Uint8List bytes) {
+          final decoded = utf8.decode(bytes, allowMalformed: true);
+          print('Testtttchunk*** $decoded');
+          onData(decoded);
+        },
+        onDone: onDone,
+        onError: onError,
+        cancelOnError: true,
+      );
+    } on DioException catch (e) {
+      onError(_handleDioError(e));
+    } catch (e) {
+      onError(e);
+    }
+  }
+
   NetworkException _handleDioError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
@@ -137,7 +187,10 @@ class DioConsumer implements ApiConsumer {
         );
       case DioExceptionType.badResponse:
         return NetworkException(
-          message: _getErrorMessage(error.response?.statusCode, error.response?.data),
+          message: _getErrorMessage(
+            error.response?.statusCode,
+            error.response?.data,
+          ),
           statusCode: error.response?.statusCode,
           data: error.response?.data,
         );
@@ -185,4 +238,3 @@ class DioConsumer implements ApiConsumer {
     }
   }
 }
-

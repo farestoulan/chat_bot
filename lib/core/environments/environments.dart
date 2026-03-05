@@ -12,4 +12,5 @@ final class DevelopmentEnvironment extends Environment {
   @override
   String get baseUrl =>
       'https://by4snzvvns5rnyvs3eoemt7neu0amywq.lambda-url.us-east-1.on.aws/api';
+  // 'https://httpbingo.org';
 }

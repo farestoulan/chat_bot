@@ -1,12 +1,14 @@
 import 'dart:convert';
-import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import '../../../../core/api/api_consumer.dart';
-import '../../../../core/error_handling/exceptions.dart';
 
-/// Remote data source for chat API
 abstract class RemoteChatDatasource {
-  Future<Either<NetworkException, String>> sendMessage(String query);
+  Future<void> sendMessageStream(
+    String query, {
+    Map<String, dynamic>? userInfo,
+    required Function(String token) onData,
+    required Function() onDone,
+    required Function(dynamic error) onError,
+  });
 }
 
 class RemoteChatDatasourceImpl implements RemoteChatDatasource {
@@ -15,61 +17,75 @@ class RemoteChatDatasourceImpl implements RemoteChatDatasource {
   RemoteChatDatasourceImpl({required this.apiConsumer});
 
   @override
-  Future<Either<NetworkException, String>> sendMessage(String query) async {
-    final result = await apiConsumer.post(
+  Future<void> sendMessageStream(
+    String query, {
+    Map<String, dynamic>? userInfo,
+    required Function(String token) onData,
+    required Function() onDone,
+    required Function(dynamic error) onError,
+  }) async {
+    final lineBuffer = StringBuffer();
+
+    final body = <String, dynamic>{'query': query};
+    if (userInfo != null) {
+      body.addAll(userInfo);
+    }
+
+    await apiConsumer.postStream(
       '/chat/stream',
-      body: {'query': query},
-      // options: Options(responseType: ResponseType.stream),
+      body: body,
+      onData: (chunk) {
+        lineBuffer.write(chunk);
+        final bufferContent = lineBuffer.toString();
+        final lines = bufferContent.split('\n');
+
+        lineBuffer.clear();
+
+        final completeLines =
+            bufferContent.endsWith('\n') ? lines : lines.sublist(0, lines.length - 1);
+
+        if (!bufferContent.endsWith('\n')) {
+          lineBuffer.write(lines.last);
+        }
+
+        for (final line in completeLines) {
+          final trimmed = line.trim();
+          if (trimmed.isEmpty) continue;
+
+          final content = _extractContent(trimmed);
+          if (content != null) {
+            onData(content);
+          }
+        }
+      },
+      onDone: () {
+        if (lineBuffer.isNotEmpty) {
+          final content = _extractContent(lineBuffer.toString().trim());
+          if (content != null) onData(content);
+        }
+        onDone();
+      },
+      onError: onError,
     );
+  }
 
-    return result.fold((error) => Left(error), (data) {
+  /// Tries to extract the text content from an SSE data line.
+  /// Falls back to returning the raw line if it's not SSE formatted.
+  String? _extractContent(String line) {
+    if (line.startsWith('data: ')) {
+      final jsonStr = line.substring(6).trim();
+      if (jsonStr.isEmpty) return null;
       try {
-        // If data is a string, parse it as SSE format
-        if (data is String) {
-          StringBuffer contentBuffer = StringBuffer();
-          final lines = data.split('\n');
-
-          for (final line in lines) {
-            final trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data: ')) {
-              final jsonStr =
-                  trimmedLine.substring(6).trim(); // Remove "data: " prefix
-              if (jsonStr.isNotEmpty) {
-                try {
-                  final jsonData = json.decode(jsonStr) as Map<String, dynamic>;
-                  // Extract content if available
-                  if (jsonData.containsKey('content')) {
-                    contentBuffer.write(jsonData['content']);
-                  }
-                } catch (e) {
-                  // Skip invalid JSON lines (like chat_id lines)
-                  continue;
-                }
-              }
-            }
-          }
-
-          final fullContent = contentBuffer.toString();
-          if (fullContent.isNotEmpty) {
-            return Right(fullContent);
-          }
+        final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+        if (data.containsKey('content')) {
+          final content = data['content'];
+          if (content is String && content.isNotEmpty) return content;
+          return null;
         }
-
-        // Fallback: try to parse as regular JSON
-        if (data is Map && data.containsKey('content')) {
-          return Right(data['content'].toString());
-        }
-
-        return Left(
-          NetworkException(
-            message: 'Invalid response format: No content found',
-          ),
-        );
-      } catch (e) {
-        return Left(
-          NetworkException(message: 'Error parsing response: ${e.toString()}'),
-        );
+      } catch (_) {
+        return jsonStr;
       }
-    });
+    }
+    return null;
   }
 }

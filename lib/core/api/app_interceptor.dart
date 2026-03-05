@@ -9,9 +9,13 @@ class AppInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Set default headers
-    options.headers[DioStrings.contentType] = DioStrings.applicationJson;
-    options.headers['Accept'] = DioStrings.applicationJson;
+    // Set default headers only if not already set
+    if (!options.headers.containsKey(DioStrings.contentType)) {
+      options.headers[DioStrings.contentType] = DioStrings.applicationJson;
+    }
+    if (!options.headers.containsKey('Accept')) {
+      options.headers['Accept'] = DioStrings.applicationJson;
+    }
 
     super.onRequest(options, handler);
   }

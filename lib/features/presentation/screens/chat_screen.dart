@@ -8,6 +8,7 @@ import '../widgets/message_bubble.dart';
 import '../widgets/message_input_field.dart';
 import '../widgets/background_logo.dart';
 import '../widgets/typing_indicator.dart';
+import '../widgets/user_info_form.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/responsive_helper.dart';
 
@@ -56,6 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildResponsiveChatContent(
     ChatLoaded state, {
     bool isLoading = false,
+    bool isSending = false,
   }) {
     final isEmpty = state.messages.isEmpty;
 
@@ -96,6 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 MessageInputField(
                   controller: _messageController,
                   onSend: () => _sendMessage(context.read<ChatCubit>()),
+                  isLoading: isSending,
                 ),
               ],
             ),
@@ -124,12 +127,23 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         child: BlocConsumer<ChatCubit, ChatState>(
+          buildWhen: (previous, current) => true,
           listener: (context, state) {
-            if (state is ChatLoaded || state is ChatLoading) {
+            if (state is ChatLoaded ||
+                state is ChatLoading ||
+                state is ChatStreaming) {
               _scrollToBottom();
             }
           },
           builder: (context, state) {
+            if (state is ChatUserInfoRequired) {
+              return UserInfoForm(
+                onSubmit: (name, contact) {
+                  context.read<ChatCubit>().setUserInfo(name, contact);
+                },
+              );
+            }
+
             if (state is ChatInitial) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -183,6 +197,14 @@ class _ChatScreenState extends State<ChatScreen> {
               return _buildResponsiveChatContent(
                 ChatLoaded(state.messages),
                 isLoading: true,
+                isSending: true,
+              );
+            }
+
+            if (state is ChatStreaming) {
+              return _buildResponsiveChatContent(
+                ChatLoaded(state.messages),
+                isSending: true,
               );
             }
 
