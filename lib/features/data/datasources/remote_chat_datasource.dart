@@ -27,9 +27,9 @@ class RemoteChatDatasourceImpl implements RemoteChatDatasource {
     final lineBuffer = StringBuffer();
 
     final body = <String, dynamic>{'query': query};
-    if (userInfo != null) {
-      body.addAll(userInfo);
-    }
+    // if (userInfo != null) {
+    //   body.addAll(userInfo);
+    // }
 
     await apiConsumer.postStream(
       '/chat/stream',
@@ -42,7 +42,9 @@ class RemoteChatDatasourceImpl implements RemoteChatDatasource {
         lineBuffer.clear();
 
         final completeLines =
-            bufferContent.endsWith('\n') ? lines : lines.sublist(0, lines.length - 1);
+            bufferContent.endsWith('\n')
+                ? lines
+                : lines.sublist(0, lines.length - 1);
 
         if (!bufferContent.endsWith('\n')) {
           lineBuffer.write(lines.last);

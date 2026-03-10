@@ -1,5 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/responsive_helper.dart';
@@ -24,10 +26,109 @@ class _MessageBubbleState extends State<MessageBubble> {
   );
 
   bool _isArabicText(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return false;
+    // إذا بدأ النص بحرف عربي فاعتبره RTL (مثلاً: "أولاً يمكنك التواصل...")
+    final firstChar = trimmed.runes.first;
+    if (firstChar >= 0x0600 && firstChar <= 0x06FF ||
+        firstChar >= 0x0750 && firstChar <= 0x077F ||
+        firstChar >= 0x08A0 && firstChar <= 0x08FF ||
+        firstChar >= 0xFB50 && firstChar <= 0xFDFF ||
+        firstChar >= 0xFE70 && firstChar <= 0xFEFF) {
+      return true;
+    }
     final stripped = text.replaceAll(RegExp(r'\s+'), '');
     if (stripped.isEmpty) return false;
     final arabicCount = _arabicRegex.allMatches(stripped).length;
-    return arabicCount > stripped.length / 2;
+    // نسبة أقل (25%) لاعتبار النص عربي عند وجود أرقام وإيميل وروابط في نفس الرسالة
+    return arabicCount > stripped.length / 4;
+  }
+
+  /// Parses Markdown-like text: **bold**, *bold*, and [text](url) into [TextSpan]s.
+  List<InlineSpan> _parseMarkdownSpans(
+    String text,
+    TextStyle baseStyle,
+    TextStyle boldStyle,
+    TextStyle linkStyle,
+  ) {
+    final spans = <InlineSpan>[];
+    final boldDouble = RegExp(r'\*\*([^*]+)\*\*');
+    final boldSingle = RegExp(r'\*([^*]+)\*');
+    final link = RegExp(r'\[([^\]]+)\]\(([^)]+)\)');
+    int pos = 0;
+
+    while (pos < text.length) {
+      int? nextStart;
+      int nextEnd = pos;
+      String? boldText;
+      String? linkText;
+      String? linkUrl;
+
+      final boldDoubleMatch = boldDouble.firstMatch(text.substring(pos));
+      if (boldDoubleMatch != null) {
+        nextStart = pos + boldDoubleMatch.start;
+        nextEnd = pos + boldDoubleMatch.end;
+        boldText = boldDoubleMatch.group(1);
+      }
+
+      final boldSingleMatch = boldSingle.firstMatch(text.substring(pos));
+      if (boldSingleMatch != null) {
+        final start = pos + boldSingleMatch.start;
+        if (nextStart == null || start < nextStart) {
+          nextStart = start;
+          nextEnd = pos + boldSingleMatch.end;
+          boldText = boldSingleMatch.group(1);
+        }
+      }
+
+      final linkMatch = link.firstMatch(text.substring(pos));
+      if (linkMatch != null) {
+        final start = pos + linkMatch.start;
+        if (nextStart == null || start < nextStart) {
+          nextStart = start;
+          nextEnd = pos + linkMatch.end;
+          boldText = null;
+          linkText = linkMatch.group(1);
+          linkUrl = linkMatch.group(2);
+        }
+      }
+
+      if (nextStart == null) {
+        spans.add(TextSpan(text: text.substring(pos), style: baseStyle));
+        break;
+      }
+
+      if (nextStart > pos) {
+        spans.add(TextSpan(
+          text: text.substring(pos, nextStart),
+          style: baseStyle,
+        ));
+      }
+
+      if (boldText != null) {
+        spans.add(TextSpan(text: boldText, style: boldStyle));
+      } else if (linkText != null && linkUrl != null) {
+        final url = linkUrl.trim();
+        spans.add(TextSpan(
+          text: linkText,
+          style: linkStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              final uri = Uri.tryParse(url.startsWith('http') ? url : 'https://$url');
+              if (uri != null && await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
+        ));
+      }
+
+      pos = nextEnd;
+    }
+
+    if (spans.isEmpty) {
+      spans.add(TextSpan(text: text, style: baseStyle));
+    }
+    return spans;
   }
 
   @override
@@ -105,16 +206,33 @@ class _MessageBubbleState extends State<MessageBubble> {
           crossAxisAlignment:
               isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            SelectableText(
-              widget.message.text,
+            SelectableText.rich(
+              TextSpan(
+                children: _parseMarkdownSpans(
+                  widget.message.text,
+                  TextStyle(
+                    color: Colors.white,
+                    fontSize: fontSize,
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  TextStyle(
+                    color: Colors.white,
+                    fontSize: fontSize,
+                    height: 1.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  TextStyle(
+                    color: Colors.white,
+                    fontSize: fontSize,
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
               textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
               textAlign: isArabic ? TextAlign.right : TextAlign.left,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: fontSize,
-                height: 1.5,
-                fontWeight: FontWeight.w500,
-              ),
             ),
             const SizedBox(height: 6),
             Row(
@@ -173,16 +291,33 @@ class _MessageBubbleState extends State<MessageBubble> {
           crossAxisAlignment:
               isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            SelectableText(
-              widget.message.text,
+            SelectableText.rich(
+              TextSpan(
+                children: _parseMarkdownSpans(
+                  widget.message.text,
+                  TextStyle(
+                    color: const Color(AppConstants.textColorDarkValue),
+                    fontSize: fontSize,
+                    height: 1.5,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  TextStyle(
+                    color: const Color(AppConstants.textColorDarkValue),
+                    fontSize: fontSize,
+                    height: 1.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  TextStyle(
+                    color: const Color(AppConstants.primaryColorValue),
+                    fontSize: fontSize,
+                    height: 1.5,
+                    fontWeight: FontWeight.w400,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
               textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
               textAlign: isArabic ? TextAlign.right : TextAlign.left,
-              style: TextStyle(
-                color: const Color(AppConstants.textColorDarkValue),
-                fontSize: fontSize,
-                height: 1.5,
-                fontWeight: FontWeight.w400,
-              ),
             ),
             const SizedBox(height: 6),
             Row(
