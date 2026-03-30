@@ -19,7 +19,7 @@ class BackgroundLogo extends StatelessWidget {
             : (isMobile ? screenWidth * 0.8 : screenWidth * 0.6);
 
     // Opacity based on state - more visible when empty
-    final opacity = isEmptyState ? 0.12 : 0.2;
+    final opacity = isEmptyState ? 0.12 : 0.1;
 
     return Positioned.fill(
       child: IgnorePointer(

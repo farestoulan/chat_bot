@@ -20,6 +20,7 @@ class MessageBubble extends StatefulWidget {
 
 class _MessageBubbleState extends State<MessageBubble> {
   bool _isHovered = false;
+  bool _copied = false;
 
   static final _arabicRegex = RegExp(
     r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]',
@@ -351,24 +352,25 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Widget _buildCopyButton(BuildContext context, {required Color iconColor}) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () {
-        Clipboard.setData(ClipboardData(text: widget.message.text));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Message copied'),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 1),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+    return Tooltip(
+      message: _copied ? 'Copied!' : 'Copy',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: widget.message.text));
+          setState(() => _copied = true);
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) setState(() => _copied = false);
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: Icon(
+            _copied ? Icons.check_rounded : Icons.copy_rounded,
+            size: 14,
+            color: iconColor,
           ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Icon(Icons.copy_rounded, size: 14, color: iconColor),
+        ),
       ),
     );
   }

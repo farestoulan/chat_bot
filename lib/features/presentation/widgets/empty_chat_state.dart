@@ -13,7 +13,6 @@ class EmptyChatState extends StatelessWidget {
     final iconSize = isMobile ? 140.0 : 180.0;
     final iconInnerSize = isMobile ? 70.0 : 90.0;
     final theme = Theme.of(context);
-
     return Center(
       child: Padding(
         padding: ResponsiveHelper.getResponsivePadding(context),

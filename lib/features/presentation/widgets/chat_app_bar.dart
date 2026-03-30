@@ -124,25 +124,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _ThemeToggleButton(isMobile: isMobile),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: theme.colorScheme.primary.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.more_vert_rounded,
-                      color: theme.colorScheme.onSurface,
-                      size: isMobile ? 22 : 24,
-                    ),
-                    onPressed: () {},
-                  ),
-                ),
+                const SizedBox(width: 20),
               ],
             ),
           ),

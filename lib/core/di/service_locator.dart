@@ -7,6 +7,7 @@ import '../../features/data/repositories/chat_repository_impl.dart';
 import '../../features/domain/repositories/chat_repository.dart';
 import '../../features/presentation/cubit/chat_cubit.dart';
 import '../../features/presentation/cubit/theme_cubit.dart';
+import '../localization/locale_cubit.dart';
 
 /// Global service locator
 final injector = GetIt.instance;
@@ -35,4 +36,5 @@ Future<void> initServiceLocator() async {
     () => ChatCubit(injector<ChatRepository>()),
   );
   injector.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
+  injector.registerLazySingleton<LocaleCubit>(() => LocaleCubit());
 }
