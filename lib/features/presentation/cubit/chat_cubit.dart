@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/web.dart' as web;
 import '../../data/models/chat_message.dart';
 import '../../data/models/user_info.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -11,6 +13,10 @@ class ChatCubit extends Cubit<ChatState> {
   /// Delay between displaying each word.
   static const _wordDelay = Duration(milliseconds: 40);
 
+  static const _keyUserName = 'chatbot_user_name';
+  static const _keyUserContact = 'chatbot_user_contact';
+  static const _keyMessages = 'chatbot_messages';
+
   final _wordQueue = <String>[];
   bool _isProcessing = false;
   bool _isCancelled = false;
@@ -18,10 +24,52 @@ class ChatCubit extends Cubit<ChatState> {
   UserInfo? _userInfo;
   UserInfo? get userInfo => _userInfo;
 
-  ChatCubit(this._repository) : super(const ChatUserInfoRequired());
+  ChatCubit(this._repository) : super(const ChatUserInfoRequired()) {
+    _loadSavedSession();
+  }
+
+  void _loadSavedSession() {
+    try {
+      final storage = web.window.sessionStorage;
+      final savedName = storage.getItem(_keyUserName);
+      final savedContact = storage.getItem(_keyUserContact);
+
+      if (savedName != null && savedContact != null) {
+        _userInfo = UserInfo(name: savedName, contact: savedContact);
+
+        final savedMessages = storage.getItem(_keyMessages);
+        if (savedMessages != null) {
+          final List<dynamic> decoded = jsonDecode(savedMessages);
+          final messages =
+              decoded.map((m) => ChatMessage.fromJson(m as Map<String, dynamic>)).toList();
+          if (messages.isNotEmpty) {
+            emit(ChatLoaded(messages));
+            return;
+          }
+        }
+
+        _initializeChat();
+      }
+    } catch (_) {
+      // sessionStorage unavailable — fall through to show the form
+    }
+  }
+
+  void _saveMessages(List<ChatMessage> messages) {
+    try {
+      final encoded = jsonEncode(messages.map((m) => m.toJson()).toList());
+      web.window.sessionStorage.setItem(_keyMessages, encoded);
+    } catch (_) {}
+  }
 
   void setUserInfo(String name, String contact) {
     _userInfo = UserInfo(name: name, contact: contact);
+
+    try {
+      web.window.sessionStorage.setItem(_keyUserName, name);
+      web.window.sessionStorage.setItem(_keyUserContact, contact);
+    } catch (_) {}
+
     _initializeChat();
   }
 
@@ -38,7 +86,9 @@ class ChatCubit extends Cubit<ChatState> {
         isUser: false,
         timestamp: DateTime.now(),
       );
-      emit(ChatLoaded([welcomeMessage]));
+      final messages = [welcomeMessage];
+      _saveMessages(messages);
+      emit(ChatLoaded(messages));
     } catch (e) {
       emit(ChatError('Failed to initialize chat: ${e.toString()}', []));
     }
@@ -122,7 +172,9 @@ class ChatCubit extends Cubit<ChatState> {
           isUser: false,
           timestamp: botTimestamp,
         );
-        emit(ChatLoaded([...messagesWithUser, botMsg]));
+        final allMessages = [...messagesWithUser, botMsg];
+        _saveMessages(allMessages);
+        emit(ChatLoaded(allMessages));
       }
     }
 
@@ -148,7 +200,9 @@ class ChatCubit extends Cubit<ChatState> {
             isUser: false,
             timestamp: botTimestamp,
           );
-          emit(ChatLoaded([...messagesWithUser, botMsg]));
+          final allMessages = [...messagesWithUser, botMsg];
+          _saveMessages(allMessages);
+          emit(ChatLoaded(allMessages));
         }
       },
       onError: (error) {

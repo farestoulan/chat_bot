@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:js_interop';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/web.dart' as web;
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/localization/locale_cubit.dart';
@@ -48,10 +51,22 @@ class _UserInfoFormState extends State<UserInfoForm>
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    widget.onSubmit(
-      _nameController.text.trim(),
-      _contactController.text.trim(),
-    );
+
+    final name = _nameController.text.trim();
+    final contact = _contactController.text.trim();
+
+    try {
+      web.window.parent?.postMessage(
+        jsonEncode({
+          'type': 'chatbot-user-info',
+          'name': name,
+          'contact': contact,
+        }).toJS,
+        '*'.toJS,
+      );
+    } catch (_) {}
+
+    widget.onSubmit(name, contact);
   }
 
   @override
