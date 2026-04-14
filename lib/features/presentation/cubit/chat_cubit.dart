@@ -16,6 +16,7 @@ class ChatCubit extends Cubit<ChatState> {
   static const _keyUserName = 'chatbot_user_name';
   static const _keyUserContact = 'chatbot_user_contact';
   static const _keyMessages = 'chatbot_messages';
+  static const _maxStoredMessages = 25;
 
   final _wordQueue = <String>[];
   bool _isProcessing = false;
@@ -41,7 +42,12 @@ class ChatCubit extends Cubit<ChatState> {
         if (savedMessages != null) {
           final List<dynamic> decoded = jsonDecode(savedMessages);
           final messages =
-              decoded.map((m) => ChatMessage.fromJson(m as Map<String, dynamic>)).toList();
+              decoded
+                  .map(
+                    (m) =>
+                        ChatMessage.fromCompactJson(m as Map<String, dynamic>),
+                  )
+                  .toList();
           if (messages.isNotEmpty) {
             emit(ChatLoaded(messages));
             return;
@@ -57,7 +63,13 @@ class ChatCubit extends Cubit<ChatState> {
 
   void _saveMessages(List<ChatMessage> messages) {
     try {
-      final encoded = jsonEncode(messages.map((m) => m.toJson()).toList());
+      final toStore =
+          messages.length > _maxStoredMessages
+              ? messages.sublist(messages.length - _maxStoredMessages)
+              : messages;
+      final encoded = jsonEncode(
+        toStore.map((m) => m.toCompactJson()).toList(),
+      );
       web.window.sessionStorage.setItem(_keyMessages, encoded);
     } catch (_) {}
   }

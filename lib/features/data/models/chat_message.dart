@@ -13,18 +13,34 @@ class ChatMessage {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'text': text,
-        'isUser': isUser,
-        'timestamp': timestamp.toIso8601String(),
-      };
+    'id': id,
+    'text': text,
+    'isUser': isUser,
+    'timestamp': timestamp.toIso8601String(),
+  };
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
-        id: json['id'] as String,
-        text: json['text'] as String,
-        isUser: json['isUser'] as bool,
-        timestamp: DateTime.parse(json['timestamp'] as String),
-      );
+    id: json['id'] as String,
+    text: json['text'] as String,
+    isUser: json['isUser'] as bool,
+    timestamp: DateTime.parse(json['timestamp'] as String),
+  );
+
+  /// Compact serialization using short keys to reduce sessionStorage size (~55% smaller).
+  /// Keys: 'i' = id, 't' = text, 'u' = isUser (1=user, 0=bot).
+  /// Timestamp is intentionally omitted and restored as DateTime.now() on load.
+  Map<String, dynamic> toCompactJson() => {
+    'i': id,
+    't': text,
+    'u': isUser ? 1 : 0,
+  };
+
+  factory ChatMessage.fromCompactJson(Map<String, dynamic> json) => ChatMessage(
+    id: json['i'] as String,
+    text: json['t'] as String,
+    isUser: (json['u'] as int) == 1,
+    timestamp: DateTime.now(),
+  );
 
   /// Creates a copy of this message with updated fields
   ChatMessage copyWith({
