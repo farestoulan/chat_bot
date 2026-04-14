@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/responsive_helper.dart';
+import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../data/models/chat_message.dart';
 
@@ -21,29 +22,6 @@ class MessageBubble extends StatefulWidget {
 class _MessageBubbleState extends State<MessageBubble> {
   bool _isHovered = false;
   bool _copied = false;
-
-  static final _arabicRegex = RegExp(
-    r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]',
-  );
-
-  bool _isArabicText(String text) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return false;
-    // إذا بدأ النص بحرف عربي فاعتبره RTL (مثلاً: "أولاً يمكنك التواصل...")
-    final firstChar = trimmed.runes.first;
-    if (firstChar >= 0x0600 && firstChar <= 0x06FF ||
-        firstChar >= 0x0750 && firstChar <= 0x077F ||
-        firstChar >= 0x08A0 && firstChar <= 0x08FF ||
-        firstChar >= 0xFB50 && firstChar <= 0xFDFF ||
-        firstChar >= 0xFE70 && firstChar <= 0xFEFF) {
-      return true;
-    }
-    final stripped = text.replaceAll(RegExp(r'\s+'), '');
-    if (stripped.isEmpty) return false;
-    final arabicCount = _arabicRegex.allMatches(stripped).length;
-    // نسبة أقل (25%) لاعتبار النص عربي عند وجود أرقام وإيميل وروابط في نفس الرسالة
-    return arabicCount > stripped.length / 4;
-  }
 
   /// Parses Markdown-like text: **bold**, *bold*, and [text](url) into [TextSpan]s.
   List<InlineSpan> _parseMarkdownSpans(
@@ -179,7 +157,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     final padding = ResponsiveHelper.getMessagePadding(context);
     final fontSize = ResponsiveHelper.getMessageFontSize(context);
     final borderRadius = ResponsiveHelper.isMobile(context) ? 24.0 : 28.0;
-    final isArabic = _isArabicText(widget.message.text);
+    final isArabic = TextDirectionHelper.isArabic(widget.message.text);
 
     if (widget.message.isUser) {
       return Container(

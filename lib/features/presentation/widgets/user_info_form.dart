@@ -88,8 +88,10 @@ class _UserInfoFormState extends State<UserInfoForm>
               child: SlideTransition(
                 position: _slideUp,
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 32,
+                  ),
                   child: SizedBox(
                     width: cardWidth,
                     child: Column(
@@ -112,8 +114,9 @@ class _UserInfoFormState extends State<UserInfoForm>
                           strings.enterDetails,
                           style: TextStyle(
                             fontSize: isMobile ? 14 : 16,
-                            color:
-                                theme.colorScheme.onBackground.withOpacity(0.6),
+                            color: theme.colorScheme.onBackground.withOpacity(
+                              0.6,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -202,8 +205,7 @@ class _UserInfoFormState extends State<UserInfoForm>
           ),
         ],
       ),
-      child:
-          const Icon(Icons.smart_toy_rounded, size: 40, color: Colors.white),
+      child: const Icon(Icons.smart_toy_rounded, size: 40, color: Colors.white),
     );
   }
 
@@ -213,9 +215,7 @@ class _UserInfoFormState extends State<UserInfoForm>
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.15),
-        ),
+        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.15),
@@ -236,7 +236,10 @@ class _UserInfoFormState extends State<UserInfoForm>
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return strings.nameRequired;
                 if (v.trim().length < 2) return strings.nameTooShort;
-                if (!RegExp(r'^[\p{L}\s]+$', unicode: true).hasMatch(v.trim())) {
+                if (!RegExp(
+                  r'^[\p{L}\s]+$',
+                  unicode: true,
+                ).hasMatch(v.trim())) {
                   return strings.nameInvalidChars;
                 }
                 return null;
@@ -252,6 +255,7 @@ class _UserInfoFormState extends State<UserInfoForm>
               label: strings.contactLabel,
               hint: strings.contactHint,
               keyboardType: TextInputType.text,
+
               validator: (v) {
                 if (v == null || v.trim().isEmpty) {
                   return strings.contactRequired;
@@ -260,9 +264,7 @@ class _UserInfoFormState extends State<UserInfoForm>
                 final isEmail = RegExp(
                   r'^[\w\.\-]+@[\w\-]+(\.\w{2,})+$',
                 ).hasMatch(value);
-                final isPhone = RegExp(
-                  r'^\+?[0-9]{7,15}$',
-                ).hasMatch(value);
+                final isPhone = RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value);
                 if (!isEmail && !isPhone) {
                   return strings.contactInvalid;
                 }
@@ -300,6 +302,7 @@ class _UserInfoFormState extends State<UserInfoForm>
         color: theme.colorScheme.onBackground,
         fontSize: isMobile ? 15 : 16,
       ),
+      textInputAction: TextInputAction.send,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
@@ -314,8 +317,10 @@ class _UserInfoFormState extends State<UserInfoForm>
         prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 22),
         filled: true,
         fillColor: theme.scaffoldBackgroundColor,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
@@ -330,10 +335,7 @@ class _UserInfoFormState extends State<UserInfoForm>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: theme.colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -357,8 +359,9 @@ class _UserInfoFormState extends State<UserInfoForm>
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color:
-                  const Color(AppConstants.primaryColorValue).withOpacity(0.4),
+              color: const Color(
+                AppConstants.primaryColorValue,
+              ).withOpacity(0.4),
               blurRadius: 15,
               offset: const Offset(0, 6),
             ),

@@ -159,13 +159,18 @@ class DioConsumer implements ApiConsumer {
 
       final ResponseBody responseBody = response.data;
 
+      int chunkCount = 0;
       responseBody.stream.listen(
         (Uint8List bytes) {
+          chunkCount++;
           final decoded = utf8.decode(bytes, allowMalformed: true);
-          print('Testtttchunk*** $decoded');
+          print('🔵 CHUNK #$chunkCount (${bytes.length} bytes): $decoded');
           onData(decoded);
         },
-        onDone: onDone,
+        onDone: () {
+          print('✅ STREAM DONE — total chunks received: $chunkCount');
+          onDone();
+        },
         onError: onError,
         cancelOnError: true,
       );
