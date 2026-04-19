@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/responsive_helper.dart';
-import '../../../core/theme/app_theme.dart';
 import '../cubit/theme_cubit.dart';
 
 /// Custom app bar for the chat screen
@@ -41,27 +40,12 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
             constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
             child: Row(
               children: [
-                Container(
+                Image.asset(
+                  'assets/images/singleclic_icon_circular.png',
                   width: avatarSize,
                   height: avatarSize,
-                  decoration: BoxDecoration(
-                    gradient: AppTheme.accentGradient,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(
-                          AppConstants.secondaryColorValue,
-                        ).withOpacity(0.5),
-                        blurRadius: 15,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.smart_toy_rounded,
-                    color: Colors.white,
-                    size: avatarSize * 0.6,
-                  ),
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
                 ),
                 SizedBox(width: isMobile ? 14 : 18),
                 Column(

@@ -1,8 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import '../../core/environments/environment_injector.dart';
 import '../../core/environments/environments.dart';
-import '../../core/api/dio_injector.dart';
+import '../../core/api/dio_injector.dart' show dioInjector, leadApiDioName;
 import '../../features/data/datasources/remote_chat_datasource.dart';
+import '../../features/data/datasources/lead_datasource.dart';
 import '../../features/data/repositories/chat_repository_impl.dart';
 import '../../features/domain/repositories/chat_repository.dart';
 import '../../features/presentation/cubit/chat_cubit.dart';
@@ -25,6 +27,11 @@ Future<void> initServiceLocator() async {
   injector.registerLazySingleton<RemoteChatDatasource>(
     () => RemoteChatDatasourceImpl(apiConsumer: injector()),
   );
+  injector.registerLazySingleton<LeadDatasource>(
+    () => LeadDatasourceImpl(
+      dio: injector<Dio>(instanceName: leadApiDioName),
+    ),
+  );
 
   // Repositories
   injector.registerLazySingleton<ChatRepository>(
@@ -33,7 +40,7 @@ Future<void> initServiceLocator() async {
 
   // Cubits / Blocs
   injector.registerFactory<ChatCubit>(
-    () => ChatCubit(injector<ChatRepository>()),
+    () => ChatCubit(injector<ChatRepository>(), injector<LeadDatasource>()),
   );
   injector.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
   injector.registerLazySingleton<LocaleCubit>(() => LocaleCubit());

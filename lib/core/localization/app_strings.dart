@@ -43,6 +43,13 @@ class AppStrings {
       ? 'من فضلك أدخل رقم موبايل أو بريد إلكتروني صحيح'
       : 'Please enter a valid phone number or email';
   String get startChat => isAr ? 'ابدأ المحادثة' : 'Start Chat';
+  String get submitting => isAr ? 'جاري التسجيل...' : 'Submitting...';
+  String get leadCreationFailed => isAr
+      ? 'تعذر تسجيل بياناتك. يرجى المحاولة مرة أخرى.'
+      : 'Failed to register your information. Please try again.';
+  String get leadCreationSuccess => isAr
+      ? 'تم تسجيل بياناتك بنجاح'
+      : 'Your information has been registered successfully';
 
   // ── Empty Chat State ─────────────────────────────────────
   String get startConversation =>

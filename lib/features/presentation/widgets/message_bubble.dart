@@ -78,27 +78,34 @@ class _MessageBubbleState extends State<MessageBubble> {
       }
 
       if (nextStart > pos) {
-        spans.add(TextSpan(
-          text: text.substring(pos, nextStart),
-          style: baseStyle,
-        ));
+        spans.add(
+          TextSpan(text: text.substring(pos, nextStart), style: baseStyle),
+        );
       }
 
       if (boldText != null) {
         spans.add(TextSpan(text: boldText, style: boldStyle));
       } else if (linkText != null && linkUrl != null) {
         final url = linkUrl.trim();
-        spans.add(TextSpan(
-          text: linkText,
-          style: linkStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              final uri = Uri.tryParse(url.startsWith('http') ? url : 'https://$url');
-              if (uri != null && await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
-        ));
+        spans.add(
+          TextSpan(
+            text: linkText,
+            style: linkStyle,
+            recognizer:
+                TapGestureRecognizer()
+                  ..onTap = () async {
+                    final uri = Uri.tryParse(
+                      url.startsWith('http') ? url : 'https://$url',
+                    );
+                    if (uri != null && await canLaunchUrl(uri)) {
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  },
+          ),
+        );
       }
 
       pos = nextEnd;
@@ -354,46 +361,22 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Widget _buildBotAvatar(BuildContext context, double size) {
-    return Container(
+    return Image.asset(
+      'assets/images/singleclic_icon_circular.png',
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        gradient: AppTheme.accentGradient,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(
-              AppConstants.secondaryColorValue,
-            ).withOpacity(0.4),
-            blurRadius: 12,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Icon(
-        Icons.smart_toy_rounded,
-        color: Colors.white,
-        size: size * 0.6,
-      ),
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
     );
   }
 
   Widget _buildUserAvatar(BuildContext context, double size) {
-    return Container(
+    return Image.asset(
+      'assets/images/singleclic_icon_circular.png',
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(AppConstants.primaryColorValue).withOpacity(0.4),
-            blurRadius: 12,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Icon(Icons.person_rounded, color: Colors.white, size: size * 0.6),
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
     );
   }
 }

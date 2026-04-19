@@ -69,28 +69,29 @@ class _TypingIndicatorState extends State<TypingIndicator>
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           // Bot avatar
-          Container(
-            width: avatarSize,
-            height: avatarSize,
-            decoration: BoxDecoration(
-              gradient: AppTheme.accentGradient,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(
-                    AppConstants.secondaryColorValue,
-                  ).withOpacity(0.4),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.smart_toy_rounded,
-              color: Colors.white,
-              size: avatarSize * 0.6,
-            ),
-          ),
+          _buildBotAvatar(context, avatarSize),
+          // Container(
+          //   width: avatarSize,
+          //   height: avatarSize,
+          //   decoration: BoxDecoration(
+          //     gradient: AppTheme.accentGradient,
+          //     shape: BoxShape.circle,
+          //     boxShadow: [
+          //       BoxShadow(
+          //         color: const Color(
+          //           AppConstants.secondaryColorValue,
+          //         ).withOpacity(0.4),
+          //         blurRadius: 12,
+          //         spreadRadius: 2,
+          //       ),
+          //     ],
+          //   ),
+          //   child: Icon(
+          //     Icons.smart_toy_rounded,
+          //     color: Colors.white,
+          //     size: avatarSize * 0.6,
+          //   ),
+          // ),
           SizedBox(width: spacing),
           // Typing bubble
           Flexible(
@@ -153,6 +154,16 @@ class _TypingIndicatorState extends State<TypingIndicator>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBotAvatar(BuildContext context, double size) {
+    return Image.asset(
+      'assets/images/singleclic_icon_circular.png',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
     );
   }
 }
