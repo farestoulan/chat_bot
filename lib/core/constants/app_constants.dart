@@ -25,7 +25,9 @@ class AppConstants {
   );
 
   static String get leadApiEffectiveBaseUrl =>
-      _leadApiBaseUrlOverride.isNotEmpty ? _leadApiBaseUrlOverride : odooBaseUrl;
+      _leadApiBaseUrlOverride.isNotEmpty
+          ? _leadApiBaseUrlOverride
+          : odooBaseUrl;
 
   static String get leadApiEffectivePath =>
       _leadApiPathOverride.isNotEmpty ? _leadApiPathOverride : leadEndpoint;
@@ -41,7 +43,7 @@ class AppConstants {
   static const int botMessageColorValue = 0xFF1E1E3F;
 
   // Bot Configuration
-  static const String botName = 'ChatBot Assistant';
+  static const String botName = 'Agentic Assistant';
   static const String botStatus = 'Online';
   static const String welcomeMessage =
       "Hello! 👋 I'm your friendly chatbot. How can I help you today? \n\n مرحباً! 👋 أنا روبوت الدردشة الودود الخاص بك. كيف يمكنني مساعدتك اليوم؟";

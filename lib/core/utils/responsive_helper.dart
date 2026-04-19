@@ -61,22 +61,22 @@ class ResponsiveHelper {
   /// Get responsive avatar size
   static double getAvatarSize(BuildContext context) {
     if (isMobile(context)) {
-      return 32;
+      return 45;
     } else if (isTablet(context)) {
-      return 36;
+      return 50;
     } else {
-      return 40;
+      return 50;
     }
   }
 
   /// Get responsive app bar avatar size
   static double getAppBarAvatarSize(BuildContext context) {
     if (isMobile(context)) {
-      return 40;
+      return 55;
     } else if (isTablet(context)) {
-      return 44;
+      return 55;
     } else {
-      return 48;
+      return 55;
     }
   }
 
@@ -121,4 +121,3 @@ class ResponsiveHelper {
     }
   }
 }
-

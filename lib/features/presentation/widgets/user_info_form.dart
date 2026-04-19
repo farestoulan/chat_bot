@@ -113,9 +113,9 @@ class _UserInfoFormState extends State<UserInfoForm>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildLocaleToggle(theme, isMobile),
-                        const SizedBox(height: 16),
+                        // const SizedBox(height: 16),
                         _buildAvatar(),
-                        const SizedBox(height: 24),
+                        // const SizedBox(height: 24),
                         Text(
                           strings.welcomeTitle,
                           style: TextStyle(
@@ -134,7 +134,7 @@ class _UserInfoFormState extends State<UserInfoForm>
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 10),
                         _buildCard(theme, isMobile, strings),
                       ],
                     ),
@@ -206,21 +206,12 @@ class _UserInfoFormState extends State<UserInfoForm>
   }
 
   Widget _buildAvatar() {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(AppConstants.primaryColorValue).withOpacity(0.4),
-            blurRadius: 20,
-            spreadRadius: 4,
-          ),
-        ],
-      ),
-      child: const Icon(Icons.smart_toy_rounded, size: 40, color: Colors.white),
+    return Image.asset(
+      'assets/images/logo.png',
+      // width: 500,
+      // height: 120,
+      fit: BoxFit.fitHeight,
+      filterQuality: FilterQuality.high,
     );
   }
 
@@ -383,14 +374,19 @@ class _UserInfoFormState extends State<UserInfoForm>
       height: isMobile ? 52 : 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: busy
-              ? LinearGradient(
-                  colors: [
-                    const Color(AppConstants.primaryColorValue).withOpacity(0.6),
-                    const Color(AppConstants.primaryColorValue).withOpacity(0.4),
-                  ],
-                )
-              : AppTheme.primaryGradient,
+          gradient:
+              busy
+                  ? LinearGradient(
+                    colors: [
+                      const Color(
+                        AppConstants.primaryColorValue,
+                      ).withOpacity(0.6),
+                      const Color(
+                        AppConstants.primaryColorValue,
+                      ).withOpacity(0.4),
+                    ],
+                  )
+                  : AppTheme.primaryGradient,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -412,23 +408,24 @@ class _UserInfoFormState extends State<UserInfoForm>
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: busy
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          child:
+              busy
+                  ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                  : Text(
+                    strings.startChat,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isMobile ? 16 : 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                )
-              : Text(
-                  strings.startChat,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: isMobile ? 16 : 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
         ),
       ),
     );

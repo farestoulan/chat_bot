@@ -1,3 +1,4 @@
+import 'package:chat_bot/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -31,7 +32,7 @@ class ChatBotApp extends StatelessWidget {
           return BlocBuilder<LocaleCubit, Locale>(
             builder: (context, locale) {
               return MaterialApp(
-                title: 'ChatBot Assistant',
+                title: AppConstants.botName,
                 debugShowCheckedModeBanner: false,
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
