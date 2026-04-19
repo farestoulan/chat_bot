@@ -2,6 +2,34 @@
 class AppConstants {
   AppConstants._();
 
+  // Odoo Lead API Configuration
+  static const String odooBaseUrl =
+      'https://singleclic-singleclic-odoo-staging1-27892597.dev.odoo.com';
+  static const String odooApiKey =
+      'Fqnhq706WsVOMKi0t5KCs7zY_gg2yGsUSjIsQJoDlOiNngBgrPTLkUZAN4bhg6kp';
+  static const String leadEndpoint = '/api/v1/chatbot/lead';
+  static const String defaultLeadText = "start chat";
+
+  /// When empty, requests go directly to [odooBaseUrl] (mobile/desktop OK; web may hit CORS).
+  /// For Flutter Web, point this at a **same-origin or CORS-enabled proxy** that forwards to Odoo:
+  /// `flutter run -d chrome --dart-define=LEAD_API_BASE_URL=https://your-proxy.example.com`
+  static const String _leadApiBaseUrlOverride = String.fromEnvironment(
+    'LEAD_API_BASE_URL',
+    defaultValue: '',
+  );
+
+  /// Optional path override when the proxy uses a different route than Odoo.
+  static const String _leadApiPathOverride = String.fromEnvironment(
+    'LEAD_API_PATH',
+    defaultValue: '',
+  );
+
+  static String get leadApiEffectiveBaseUrl =>
+      _leadApiBaseUrlOverride.isNotEmpty ? _leadApiBaseUrlOverride : odooBaseUrl;
+
+  static String get leadApiEffectivePath =>
+      _leadApiPathOverride.isNotEmpty ? _leadApiPathOverride : leadEndpoint;
+
   // Colors - New Modern Design
   static const int primaryColorValue = 0xFF00D4AA; // Teal/Green
   static const int secondaryColorValue = 0xFF6C5CE7; // Purple

@@ -12,6 +12,18 @@ class ChatUserInfoRequired extends ChatState {
   const ChatUserInfoRequired();
 }
 
+/// Lead API request in progress (after user taps Start Chat).
+class ChatLeadCreating extends ChatState {
+  const ChatLeadCreating();
+}
+
+/// Lead API failed; user stays on the form and can retry.
+class ChatLeadCreationFailed extends ChatState {
+  final String message;
+
+  const ChatLeadCreationFailed(this.message);
+}
+
 class ChatLoaded extends ChatState {
   final List<ChatMessage> messages;
 

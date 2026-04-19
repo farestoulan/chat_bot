@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/web.dart' as web;
+import '../../data/datasources/lead_datasource.dart';
 import '../../data/models/chat_message.dart';
 import '../../data/models/user_info.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -9,12 +11,14 @@ import 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository _repository;
+  final LeadDatasource _leadDatasource;
 
   /// Delay between displaying each word.
   static const _wordDelay = Duration(milliseconds: 40);
 
   static const _keyUserName = 'chatbot_user_name';
   static const _keyUserContact = 'chatbot_user_contact';
+  static const _keyLeadId = 'chatbot_lead_id';
   static const _keyMessages = 'chatbot_messages';
   static const _maxStoredMessages = 25;
 
@@ -25,7 +29,11 @@ class ChatCubit extends Cubit<ChatState> {
   UserInfo? _userInfo;
   UserInfo? get userInfo => _userInfo;
 
-  ChatCubit(this._repository) : super(const ChatUserInfoRequired()) {
+  int? _leadId;
+  int? get leadId => _leadId;
+
+  ChatCubit(this._repository, this._leadDatasource)
+      : super(const ChatUserInfoRequired()) {
     _loadSavedSession();
   }
 
@@ -37,6 +45,10 @@ class ChatCubit extends Cubit<ChatState> {
 
       if (savedName != null && savedContact != null) {
         _userInfo = UserInfo(name: savedName, contact: savedContact);
+        final savedLeadId = storage.getItem(_keyLeadId);
+        if (savedLeadId != null) {
+          _leadId = int.tryParse(savedLeadId);
+        }
 
         final savedMessages = storage.getItem(_keyMessages);
         if (savedMessages != null) {
@@ -74,15 +86,88 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (_) {}
   }
 
-  void setUserInfo(String name, String contact) {
+  Future<void> setUserInfo(String name, String contact) async {
     _userInfo = UserInfo(name: name, contact: contact);
+
+    emit(const ChatLeadCreating());
+
+    final leadOk = await _createLead(name, contact);
+
+    if (!leadOk) {
+      emit(
+        ChatLeadCreationFailed(
+          _lastLeadErrorMessage ?? 'Failed to create lead',
+        ),
+      );
+      return;
+    }
 
     try {
       web.window.sessionStorage.setItem(_keyUserName, name);
       web.window.sessionStorage.setItem(_keyUserContact, contact);
+      if (_leadId != null) {
+        web.window.sessionStorage.setItem(_keyLeadId, _leadId.toString());
+      }
     } catch (_) {}
 
-    _initializeChat();
+    await _initializeChat();
+  }
+
+  String? _lastLeadErrorMessage;
+
+  /// Returns `true` only when the lead API succeeds.
+  Future<bool> _createLead(String name, String contact) async {
+    _lastLeadErrorMessage = null;
+    try {
+      final result = await _leadDatasource.createLead(
+        name: name,
+        phone: contact,
+      );
+      return result.fold(
+        (error) {
+          _lastLeadErrorMessage = error.message;
+          debugPrint('Lead creation failed: ${error.message}');
+          return false;
+        },
+        (response) {
+          _leadId = response.leadId;
+          if (_leadId != null) {
+            try {
+              web.window.sessionStorage.setItem(
+                _keyLeadId,
+                _leadId.toString(),
+              );
+            } catch (_) {}
+          }
+          debugPrint('Lead created: id=${response.leadId}');
+          return true;
+        },
+      );
+    } catch (e) {
+      _lastLeadErrorMessage = e.toString();
+      debugPrint('Lead creation error: $e');
+      return false;
+    }
+  }
+
+  void _appendLeadTextToServer(String text) {
+    final id = _leadId;
+    final trimmed = text.trim();
+    if (id == null || trimmed.isEmpty) return;
+    unawaited(_appendLeadTextAsync(id, trimmed));
+  }
+
+  Future<void> _appendLeadTextAsync(int id, String trimmed) async {
+    final result = await _leadDatasource.appendLeadText(
+      leadId: id,
+      text: trimmed,
+    );
+    result.fold(
+      (e) => debugPrint('Lead append failed: ${e.message}'),
+      (r) => debugPrint(
+        'Lead append ok: lead_id=${r.leadId ?? id} ${r.message}',
+      ),
+    );
   }
 
   Future<void> _initializeChat() async {
@@ -134,6 +219,8 @@ class ChatCubit extends Cubit<ChatState> {
       ..add(userMsg);
     emit(ChatLoading(messagesWithUser));
 
+    _appendLeadTextToServer(userMsg.text);
+
     final botMsgId = _generateId();
     final botTimestamp = DateTime.now();
     final displayedText = StringBuffer();
@@ -141,6 +228,27 @@ class ChatCubit extends Cubit<ChatState> {
     _isCancelled = false;
 
     final streamingMessages = List<ChatMessage>.from(messagesWithUser);
+    var botStreamFinalized = false;
+
+    void completeBotStreamSuccess() {
+      if (botStreamFinalized || isClosed || _isCancelled) return;
+      botStreamFinalized = true;
+      final finalText = displayedText.toString();
+      if (finalText.isEmpty) {
+        emit(ChatError('No response received.', messagesWithUser));
+        return;
+      }
+      final botMsg = ChatMessage(
+        id: botMsgId,
+        text: finalText,
+        isUser: false,
+        timestamp: botTimestamp,
+      );
+      final allMessages = [...messagesWithUser, botMsg];
+      _saveMessages(allMessages);
+      _appendLeadTextToServer(finalText);
+      emit(ChatLoaded(allMessages));
+    }
 
     Future<void> processQueue() async {
       if (_isProcessing) return;
@@ -172,21 +280,7 @@ class ChatCubit extends Cubit<ChatState> {
       _isProcessing = false;
 
       if (streamDone && _wordQueue.isEmpty && !isClosed && !_isCancelled) {
-        final finalText = displayedText.toString();
-        if (finalText.isEmpty) {
-          emit(ChatError('No response received.', messagesWithUser));
-          return;
-        }
-
-        final botMsg = ChatMessage(
-          id: botMsgId,
-          text: finalText,
-          isUser: false,
-          timestamp: botTimestamp,
-        );
-        final allMessages = [...messagesWithUser, botMsg];
-        _saveMessages(allMessages);
-        emit(ChatLoaded(allMessages));
+        completeBotStreamSuccess();
       }
     }
 
@@ -201,20 +295,7 @@ class ChatCubit extends Cubit<ChatState> {
       onDone: () {
         streamDone = true;
         if (!_isProcessing && _wordQueue.isEmpty) {
-          final finalText = displayedText.toString();
-          if (finalText.isEmpty) {
-            emit(ChatError('No response received.', messagesWithUser));
-            return;
-          }
-          final botMsg = ChatMessage(
-            id: botMsgId,
-            text: finalText,
-            isUser: false,
-            timestamp: botTimestamp,
-          );
-          final allMessages = [...messagesWithUser, botMsg];
-          _saveMessages(allMessages);
-          emit(ChatLoaded(allMessages));
+          completeBotStreamSuccess();
         }
       },
       onError: (error) {

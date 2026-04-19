@@ -1,6 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:chat_bot/core/api/dio_strings.dart';
+import 'package:dio/dio.dart';
 
+/// Default JSON headers for the main [Dio] client (chat API). Lead API uses its own Dio + Bearer.
 class AppInterceptor extends Interceptor {
   AppInterceptor();
 
@@ -9,7 +10,6 @@ class AppInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Set default headers only if not already set
     if (!options.headers.containsKey(DioStrings.contentType)) {
       options.headers[DioStrings.contentType] = DioStrings.applicationJson;
     }

@@ -9,9 +9,16 @@ import '../../../core/localization/locale_cubit.dart';
 import '../../../core/localization/app_strings.dart';
 
 class UserInfoForm extends StatefulWidget {
-  final void Function(String name, String contact) onSubmit;
+  final Future<void> Function(String name, String contact) onSubmit;
+  final bool isSubmittingLead;
+  final String? leadErrorMessage;
 
-  const UserInfoForm({super.key, required this.onSubmit});
+  const UserInfoForm({
+    super.key,
+    required this.onSubmit,
+    this.isSubmittingLead = false,
+    this.leadErrorMessage,
+  });
 
   @override
   State<UserInfoForm> createState() => _UserInfoFormState();
@@ -25,6 +32,7 @@ class _UserInfoFormState extends State<UserInfoForm>
   late final AnimationController _animController;
   late final Animation<double> _fadeIn;
   late final Animation<Offset> _slideUp;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -49,8 +57,11 @@ class _UserInfoFormState extends State<UserInfoForm>
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
 
     final name = _nameController.text.trim();
     final contact = _contactController.text.trim();
@@ -66,7 +77,11 @@ class _UserInfoFormState extends State<UserInfoForm>
       );
     } catch (_) {}
 
-    widget.onSubmit(name, contact);
+    await widget.onSubmit(name, contact);
+
+    if (mounted) {
+      setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -276,6 +291,18 @@ class _UserInfoFormState extends State<UserInfoForm>
             ),
             const SizedBox(height: 28),
             _buildSubmitButton(theme, isMobile, strings),
+            if (widget.leadErrorMessage != null &&
+                widget.leadErrorMessage!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                widget.leadErrorMessage!,
+                style: TextStyle(
+                  color: theme.colorScheme.error,
+                  fontSize: isMobile ? 13 : 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ],
         ),
       ),
@@ -350,40 +377,58 @@ class _UserInfoFormState extends State<UserInfoForm>
     bool isMobile,
     AppStrings strings,
   ) {
+    final busy = _isSubmitting || widget.isSubmittingLead;
     return SizedBox(
       width: double.infinity,
       height: isMobile ? 52 : 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: AppTheme.primaryGradient,
+          gradient: busy
+              ? LinearGradient(
+                  colors: [
+                    const Color(AppConstants.primaryColorValue).withOpacity(0.6),
+                    const Color(AppConstants.primaryColorValue).withOpacity(0.4),
+                  ],
+                )
+              : AppTheme.primaryGradient,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: const Color(
                 AppConstants.primaryColorValue,
-              ).withOpacity(0.4),
+              ).withOpacity(busy ? 0.2 : 0.4),
               blurRadius: 15,
               offset: const Offset(0, 6),
             ),
           ],
         ),
         child: ElevatedButton(
-          onPressed: _submit,
+          onPressed: busy ? null : _submit,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: Text(
-            strings.startChat,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          child: busy
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : Text(
+                  strings.startChat,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: isMobile ? 16 : 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ),
       ),
     );
