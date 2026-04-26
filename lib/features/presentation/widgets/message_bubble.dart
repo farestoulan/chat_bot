@@ -371,12 +371,25 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Widget _buildUserAvatar(BuildContext context, double size) {
-    return Image.asset(
-      'assets/images/singleclic_icon_circular.png',
+    return Container(
       width: size,
       height: size,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
+      decoration: BoxDecoration(
+        gradient: AppTheme.primaryGradient,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(AppConstants.primaryColorValue).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.person_rounded,
+        size: size * 0.6,
+        color: Colors.white,
+      ),
     );
   }
 }

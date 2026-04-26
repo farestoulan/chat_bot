@@ -19,6 +19,7 @@ class ChatCubit extends Cubit<ChatState> {
   static const _keyUserName = 'chatbot_user_name';
   static const _keyUserContact = 'chatbot_user_contact';
   static const _keyLeadId = 'chatbot_lead_id';
+  static const _keyChatId = 'chatbot_chat_id';
   static const _keyMessages = 'chatbot_messages';
   static const _maxStoredMessages = 25;
 
@@ -31,6 +32,9 @@ class ChatCubit extends Cubit<ChatState> {
 
   int? _leadId;
   int? get leadId => _leadId;
+
+  String? _chatId;
+  String? get chatId => _chatId;
 
   ChatCubit(this._repository, this._leadDatasource)
       : super(const ChatUserInfoRequired()) {
@@ -48,6 +52,11 @@ class ChatCubit extends Cubit<ChatState> {
         final savedLeadId = storage.getItem(_keyLeadId);
         if (savedLeadId != null) {
           _leadId = int.tryParse(savedLeadId);
+        }
+
+        final savedChatId = storage.getItem(_keyChatId);
+        if (savedChatId != null) {
+          _chatId = savedChatId;
         }
 
         final savedMessages = storage.getItem(_keyMessages);
@@ -83,6 +92,12 @@ class ChatCubit extends Cubit<ChatState> {
         toStore.map((m) => m.toCompactJson()).toList(),
       );
       web.window.sessionStorage.setItem(_keyMessages, encoded);
+    } catch (_) {}
+  }
+
+  void _saveChatId(String chatId) {
+    try {
+      web.window.sessionStorage.setItem(_keyChatId, chatId);
     } catch (_) {}
   }
 
@@ -286,8 +301,14 @@ class ChatCubit extends Cubit<ChatState> {
 
     await _repository.sendMessageStream(
       userMessage,
+      chatId: _chatId,
       userInfo: _userInfo?.toJson(),
-      onData: (token) {
+      onData: (token, receivedChatId) {
+        if (receivedChatId != null && _chatId == null) {
+          _chatId = receivedChatId;
+          _saveChatId(receivedChatId);
+          debugPrint('Chat ID received and saved: $receivedChatId');
+        }
         final words = token.split(RegExp(r'(?<=\s)'));
         _wordQueue.addAll(words);
         processQueue();
