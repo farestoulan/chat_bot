@@ -4,8 +4,9 @@ import '../../../../core/api/api_consumer.dart';
 abstract class RemoteChatDatasource {
   Future<void> sendMessageStream(
     String query, {
+    String? chatId,
     Map<String, dynamic>? userInfo,
-    required Function(String token) onData,
+    required Function(String token, String? chatId) onData,
     required Function() onDone,
     required Function(dynamic error) onError,
   });
@@ -19,17 +20,18 @@ class RemoteChatDatasourceImpl implements RemoteChatDatasource {
   @override
   Future<void> sendMessageStream(
     String query, {
+    String? chatId,
     Map<String, dynamic>? userInfo,
-    required Function(String token) onData,
+    required Function(String token, String? chatId) onData,
     required Function() onDone,
     required Function(dynamic error) onError,
   }) async {
     final lineBuffer = StringBuffer();
 
     final body = <String, dynamic>{'query': query};
-    // if (userInfo != null) {
-    //   body.addAll(userInfo);
-    // }
+    if (chatId != null) {
+      body['session_id'] = chatId;
+    }
 
     await apiConsumer.postStream(
       '/chat/stream',
@@ -54,16 +56,16 @@ class RemoteChatDatasourceImpl implements RemoteChatDatasource {
           final trimmed = line.trim();
           if (trimmed.isEmpty) continue;
 
-          final content = _extractContent(trimmed);
-          if (content != null) {
-            onData(content);
+          final parsed = _parseResponse(trimmed);
+          if (parsed != null) {
+            onData(parsed.content, parsed.chatId);
           }
         }
       },
       onDone: () {
         if (lineBuffer.isNotEmpty) {
-          final content = _extractContent(lineBuffer.toString().trim());
-          if (content != null) onData(content);
+          final parsed = _parseResponse(lineBuffer.toString().trim());
+          if (parsed != null) onData(parsed.content, parsed.chatId);
         }
         onDone();
       },
@@ -71,23 +73,34 @@ class RemoteChatDatasourceImpl implements RemoteChatDatasource {
     );
   }
 
-  /// Tries to extract the text content from an SSE data line.
-  /// Falls back to returning the raw line if it's not SSE formatted.
-  String? _extractContent(String line) {
+  _ParsedResponse? _parseResponse(String line) {
+    String jsonStr = line;
     if (line.startsWith('data: ')) {
-      final jsonStr = line.substring(6).trim();
-      if (jsonStr.isEmpty) return null;
-      try {
-        final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-        if (data.containsKey('content')) {
-          final content = data['content'];
-          if (content is String && content.isNotEmpty) return content;
-          return null;
-        }
-      } catch (_) {
-        return jsonStr;
-      }
+      jsonStr = line.substring(6).trim();
     }
-    return null;
+    if (jsonStr.isEmpty) return null;
+
+    try {
+      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final content = data['content'];
+      final chatId = data['chat_id'];
+
+      if (content is String && content.isNotEmpty) {
+        return _ParsedResponse(
+          content: content,
+          chatId: chatId is String ? chatId : null,
+        );
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
+}
+
+class _ParsedResponse {
+  final String content;
+  final String? chatId;
+
+  _ParsedResponse({required this.content, this.chatId});
 }

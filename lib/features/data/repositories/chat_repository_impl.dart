@@ -12,13 +12,15 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   Future<void> sendMessageStream(
     String userMessage, {
+    String? chatId,
     Map<String, dynamic>? userInfo,
-    required Function(String token) onData,
+    required Function(String token, String? chatId) onData,
     required Function() onDone,
     required Function(dynamic error) onError,
   }) {
     return _datasource.sendMessageStream(
       userMessage,
+      chatId: chatId,
       userInfo: userInfo,
       onData: onData,
       onDone: onDone,
