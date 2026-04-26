@@ -270,7 +270,7 @@ class _UserInfoFormState extends State<UserInfoForm>
                 final isEmail = RegExp(
                   r'^[\w\.\-]+@[\w\-]+(\.\w{2,})+$',
                 ).hasMatch(value);
-                final isPhone = RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value);
+                final isPhone = RegExp(r'^\+?[0-9]{12}$').hasMatch(value);
                 if (!isEmail && !isPhone) {
                   return strings.contactInvalid;
                 }
