@@ -82,13 +82,13 @@ class MessageInputField extends StatelessWidget {
       child: TextField(
         controller: controller,
         style: TextStyle(
-          color: theme.colorScheme.onBackground,
+          color: theme.colorScheme.onSurface,
           fontSize: isMobile ? 15 : 16,
         ),
         decoration: InputDecoration(
           hintText: 'Type a message...',
           hintStyle: TextStyle(
-            color: theme.colorScheme.onBackground.withOpacity(0.4),
+            color: theme.colorScheme.onSurface.withOpacity(0.4),
             fontSize: isMobile ? 15 : 16,
           ),
           border: InputBorder.none,

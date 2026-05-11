@@ -121,7 +121,7 @@ class _UserInfoFormState extends State<UserInfoForm>
                           style: TextStyle(
                             fontSize: isMobile ? 26 : 30,
                             fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onBackground,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -129,7 +129,7 @@ class _UserInfoFormState extends State<UserInfoForm>
                           strings.enterDetails,
                           style: TextStyle(
                             fontSize: isMobile ? 14 : 16,
-                            color: theme.colorScheme.onBackground.withOpacity(
+                            color: theme.colorScheme.onSurface.withOpacity(
                               0.6,
                             ),
                           ),
@@ -317,7 +317,7 @@ class _UserInfoFormState extends State<UserInfoForm>
       textDirection: textDirection,
       validator: validator,
       style: TextStyle(
-        color: theme.colorScheme.onBackground,
+        color: theme.colorScheme.onSurface,
         fontSize: isMobile ? 15 : 16,
       ),
       textInputAction: TextInputAction.send,
@@ -325,11 +325,11 @@ class _UserInfoFormState extends State<UserInfoForm>
         labelText: label,
         hintText: hint,
         labelStyle: TextStyle(
-          color: theme.colorScheme.onBackground.withOpacity(0.7),
+          color: theme.colorScheme.onSurface.withOpacity(0.7),
           fontSize: isMobile ? 13 : 14,
         ),
         hintStyle: TextStyle(
-          color: theme.colorScheme.onBackground.withOpacity(0.35),
+          color: theme.colorScheme.onSurface.withOpacity(0.35),
           fontSize: isMobile ? 14 : 15,
         ),
         prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 22),

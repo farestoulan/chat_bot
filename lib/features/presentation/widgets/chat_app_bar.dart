@@ -55,7 +55,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                     Text(
                       AppConstants.botName,
                       style: TextStyle(
-                        color: theme.colorScheme.onBackground,
+                        color: theme.colorScheme.onSurface,
                         fontSize: isMobile ? 19 : 22,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
@@ -86,7 +86,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                         Text(
                           AppConstants.botStatus,
                           style: TextStyle(
-                            color: theme.colorScheme.onBackground.withOpacity(
+                            color: theme.colorScheme.onSurface.withOpacity(
                               0.7,
                             ),
                             fontSize: isMobile ? 12 : 13,

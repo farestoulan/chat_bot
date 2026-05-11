@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/responsive_helper.dart';
-import '../../../core/theme/app_theme.dart';
 
 /// Professional typing indicator widget that shows animated dots
 class TypingIndicator extends StatefulWidget {

@@ -66,7 +66,7 @@ class EmptyChatState extends StatelessWidget {
               'Type a message below to begin chatting',
               style: TextStyle(
                 fontSize: isMobile ? 16 : 18,
-                color: theme.colorScheme.onBackground.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
                 fontWeight: FontWeight.w300,
               ),
               textAlign: TextAlign.center,
