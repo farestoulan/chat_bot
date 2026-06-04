@@ -4,7 +4,7 @@ class AppConstants {
 
   // Odoo Lead API Configuration
   static const String odooBaseUrl =
-      'https://singleclic-singleclic-odoo-staging1-27892597.dev.odoo.com';
+      'https://singleclic-singleclic-odoo-staging1-33087487.dev.odoo.com';
   static const String odooApiKey =
       'Fqnhq706WsVOMKi0t5KCs7zY_gg2yGsUSjIsQJoDlOiNngBgrPTLkUZAN4bhg6kp';
   static const String leadEndpoint = '/api/v1/chatbot/lead';
