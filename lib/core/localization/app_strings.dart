@@ -26,22 +26,49 @@ class AppStrings {
   String get nameHint => isAr ? 'أدخل اسمك' : 'Enter your name';
   String get nameRequired =>
       isAr ? 'من فضلك أدخل اسمك' : 'Please enter your name';
-  String get contactLabel =>
-      isAr ? 'رقم الموبايل أو البريد الإلكتروني' : 'Phone number or Email';
-  String get contactHint =>
-      isAr ? '01xxxxxxxxx أو email@example.com' : '+1xxxxxxxxxx or email@example.com';
-  String get contactRequired => isAr
-      ? 'من فضلك أدخل رقم الموبايل أو البريد الإلكتروني'
-      : 'Please enter your phone number or email';
   String get nameTooShort => isAr
       ? 'الاسم يجب أن يكون حرفين على الأقل'
       : 'Name must be at least 2 characters';
   String get nameInvalidChars => isAr
       ? 'الاسم يجب أن يحتوي على حروف ومسافات فقط'
       : 'Name can only contain letters and spaces';
+
+  // Contact toggle
+  String get phoneTab => isAr ? 'موبايل' : 'Phone';
+  String get emailTab => isAr ? 'بريد إلكتروني' : 'Email';
+
+  // Phone field
+  String get phoneLabel => isAr ? 'رقم الموبايل' : 'Phone number';
+  String get phoneHint => isAr ? '1012345678' : '1012345678';
+  String get phoneRequired =>
+      isAr ? 'من فضلك أدخل رقم الموبايل' : 'Please enter your phone number';
+  String get phoneInvalid =>
+      isAr ? 'من فضلك أدخل رقم موبايل صحيح' : 'Please enter a valid phone number';
+  String phoneInvalidLength(int length) => isAr
+      ? 'الرقم يجب أن يكون $length أرقام بالظبط'
+      : 'Number must be exactly $length digits';
+  String get phoneRequiredToast => isAr
+      ? 'من فضلك أدخل رقم الموبايل بعد اختيار كود الدولة'
+      : 'Please enter your phone number after selecting a country code';
+
+  // Email field
+  String get emailLabel => isAr ? 'البريد الإلكتروني' : 'Email';
+  String get emailHint => isAr ? 'email@example.com' : 'email@example.com';
+  String get emailRequired =>
+      isAr ? 'من فضلك أدخل بريدك الإلكتروني' : 'Please enter your email';
+  String get emailInvalid =>
+      isAr ? 'من فضلك أدخل بريد إلكتروني صحيح' : 'Please enter a valid email address';
+
+  // Legacy — kept for backward compat
+  String get contactLabel =>
+      isAr ? 'رقم الموبايل أو البريد الإلكتروني' : 'Phone number or Email';
+  String get contactRequired => isAr
+      ? 'من فضلك أدخل رقم الموبايل أو البريد الإلكتروني'
+      : 'Please enter your phone number or email';
   String get contactInvalid => isAr
       ? 'من فضلك أدخل رقم موبايل أو بريد إلكتروني صحيح'
       : 'Please enter a valid phone number or email';
+
   String get startChat => isAr ? 'ابدأ المحادثة' : 'Start Chat';
   String get submitting => isAr ? 'جاري التسجيل...' : 'Submitting...';
   String get leadCreationFailed => isAr

@@ -1,6 +1,7 @@
 import 'package:chat_bot/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'core/di/service_locator.dart';
@@ -40,6 +41,7 @@ class ChatBotApp extends StatelessWidget {
                 locale: locale,
                 supportedLocales: const [Locale('en'), Locale('ar')],
                 localizationsDelegates: const [
+                  CountryLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
