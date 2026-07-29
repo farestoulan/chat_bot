@@ -136,13 +136,9 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           },
           builder: (context, state) {
-            if (state is ChatUserInfoRequired ||
-                state is ChatLeadCreating ||
-                state is ChatLeadCreationFailed) {
+            if (state is ChatUserInfoRequired || state is ChatLeadCreating) {
               return UserInfoForm(
                 isSubmittingLead: state is ChatLeadCreating,
-                leadErrorMessage:
-                    state is ChatLeadCreationFailed ? state.message : null,
                 onSubmit: (name, contact) async {
                   await context.read<ChatCubit>().setUserInfo(name, contact);
                 },

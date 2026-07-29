@@ -13,13 +13,11 @@ import '../../../core/localization/app_strings.dart';
 class UserInfoForm extends StatefulWidget {
   final Future<void> Function(String name, String contact) onSubmit;
   final bool isSubmittingLead;
-  final String? leadErrorMessage;
 
   const UserInfoForm({
     super.key,
     required this.onSubmit,
     this.isSubmittingLead = false,
-    this.leadErrorMessage,
   });
 
   @override
@@ -357,18 +355,6 @@ class _UserInfoFormState extends State<UserInfoForm>
             ),
             const SizedBox(height: 28),
             _buildSubmitButton(theme, isMobile, strings),
-            if (widget.leadErrorMessage != null &&
-                widget.leadErrorMessage!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                widget.leadErrorMessage!,
-                style: TextStyle(
-                  color: theme.colorScheme.error,
-                  fontSize: isMobile ? 13 : 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
           ],
         ),
       ),

@@ -106,16 +106,8 @@ class ChatCubit extends Cubit<ChatState> {
 
     emit(const ChatLeadCreating());
 
-    final leadOk = await _createLead(name, contact);
-
-    if (!leadOk) {
-      emit(
-        ChatLeadCreationFailed(
-          _lastLeadErrorMessage ?? 'Failed to create lead',
-        ),
-      );
-      return;
-    }
+    // The lead is a CRM side effect; a failure here must never block the chat.
+    await _createLead(name, contact);
 
     try {
       web.window.sessionStorage.setItem(_keyUserName, name);
@@ -128,22 +120,14 @@ class ChatCubit extends Cubit<ChatState> {
     await _initializeChat();
   }
 
-  String? _lastLeadErrorMessage;
-
-  /// Returns `true` only when the lead API succeeds.
-  Future<bool> _createLead(String name, String contact) async {
-    _lastLeadErrorMessage = null;
+  Future<void> _createLead(String name, String contact) async {
     try {
       final result = await _leadDatasource.createLead(
         name: name,
         phone: contact,
       );
-      return result.fold(
-        (error) {
-          _lastLeadErrorMessage = error.message;
-          debugPrint('Lead creation failed: ${error.message}');
-          return false;
-        },
+      result.fold(
+        (error) => debugPrint('Lead creation failed: ${error.message}'),
         (response) {
           _leadId = response.leadId;
           if (_leadId != null) {
@@ -155,13 +139,10 @@ class ChatCubit extends Cubit<ChatState> {
             } catch (_) {}
           }
           debugPrint('Lead created: id=${response.leadId}');
-          return true;
         },
       );
     } catch (e) {
-      _lastLeadErrorMessage = e.toString();
       debugPrint('Lead creation error: $e');
-      return false;
     }
   }
 
