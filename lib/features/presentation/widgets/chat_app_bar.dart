@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/responsive_helper.dart';
 import '../cubit/theme_cubit.dart';
+import 'bot_circular_avatar.dart';
 
 /// Custom app bar for the chat screen
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -40,13 +41,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
             constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
             child: Row(
               children: [
-                Image.asset(
-                  'assets/images/singleclic_icon_circular.png',
-                  width: avatarSize,
-                  height: avatarSize,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                ),
+                BotCircularAvatar(size: avatarSize),
                 SizedBox(width: isMobile ? 14 : 18),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

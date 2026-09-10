@@ -8,6 +8,7 @@ import '../../../core/utils/responsive_helper.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../data/models/chat_message.dart';
+import 'bot_circular_avatar.dart';
 
 /// Widget for displaying a chat message bubble
 class MessageBubble extends StatefulWidget {
@@ -361,13 +362,7 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Widget _buildBotAvatar(BuildContext context, double size) {
-    return Image.asset(
-      'assets/images/singleclic_icon_circular.png',
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-    );
+    return BotCircularAvatar(size: size);
   }
 
   Widget _buildUserAvatar(BuildContext context, double size) {

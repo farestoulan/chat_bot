@@ -73,6 +73,53 @@ const Map<String, int> _countryPhoneLengths = {
 int _phoneLengthFor(String? isoCode) =>
     _countryPhoneLengths[isoCode?.toUpperCase()] ?? 10;
 
+/// Strips pasted/typed country code, `00`, and leading `0` so the field
+/// only keeps the national number (e.g. `2019292929` + dial `+20` → `19292929`).
+String normalizeNationalPhone(
+  String input, {
+  required String dialCode,
+  required int maxLength,
+}) {
+  var digits = input.replaceAll(RegExp(r'\D'), '');
+  if (digits.startsWith('00')) {
+    digits = digits.substring(2);
+  }
+
+  final cc = dialCode.replaceAll(RegExp(r'\D'), '');
+  if (cc.isNotEmpty && digits.startsWith(cc)) {
+    digits = digits.substring(cc.length);
+  }
+
+  digits = digits.replaceFirst(RegExp(r'^0+'), '');
+  if (digits.length > maxLength) {
+    digits = digits.substring(0, maxLength);
+  }
+  return digits;
+}
+
+class _NationalPhoneFormatter extends TextInputFormatter {
+  _NationalPhoneFormatter({required this.dialCode, required this.maxLength});
+
+  final String dialCode;
+  final int maxLength;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = normalizeNationalPhone(
+      newValue.text,
+      dialCode: dialCode,
+      maxLength: maxLength,
+    );
+    return TextEditingValue(
+      text: digits,
+      selection: TextSelection.collapsed(offset: digits.length),
+    );
+  }
+}
+
 class _UserInfoFormState extends State<UserInfoForm>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
@@ -138,7 +185,11 @@ class _UserInfoFormState extends State<UserInfoForm>
 
     final name = _nameController.text.trim();
     final contact = _isPhoneMode
-        ? '$_dialCode${_phoneController.text.trim()}'
+        ? '$_dialCode${normalizeNationalPhone(
+            _phoneController.text,
+            dialCode: _dialCode,
+            maxLength: _phoneMaxLength,
+          )}'
         : _emailController.text.trim();
 
     try {
@@ -469,7 +520,11 @@ class _UserInfoFormState extends State<UserInfoForm>
     return FormField<String>(
       key: ValueKey('phone_$_isoCode'),
       validator: (_) {
-        final val = _phoneController.text.trim();
+        final val = normalizeNationalPhone(
+          _phoneController.text,
+          dialCode: _dialCode,
+          maxLength: expectedLength,
+        );
         if (val.isEmpty) return strings.phoneRequired;
         if (val.length != expectedLength) {
           return strings.phoneInvalidLength(expectedLength);
@@ -546,7 +601,10 @@ class _UserInfoFormState extends State<UserInfoForm>
                       textDirection: TextDirection.ltr,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(expectedLength),
+                        _NationalPhoneFormatter(
+                          dialCode: _dialCode,
+                          maxLength: expectedLength,
+                        ),
                       ],
                       style: TextStyle(
                         color: theme.colorScheme.onSurface,

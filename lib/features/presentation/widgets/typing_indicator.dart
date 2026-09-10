@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/responsive_helper.dart';
+import 'bot_circular_avatar.dart';
 
 /// Professional typing indicator widget that shows animated dots
 class TypingIndicator extends StatefulWidget {
@@ -157,12 +158,6 @@ class _TypingIndicatorState extends State<TypingIndicator>
   }
 
   Widget _buildBotAvatar(BuildContext context, double size) {
-    return Image.asset(
-      'assets/images/singleclic_icon_circular.png',
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-    );
+    return BotCircularAvatar(size: size);
   }
 }
