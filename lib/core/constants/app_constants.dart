@@ -3,10 +3,15 @@ class AppConstants {
   AppConstants._();
 
   // Odoo Lead API Configuration
+  // static const String odooBaseUrl =
+  //     'https://singleclic-singleclic-odoo-staging1-35615990.dev.odoo.com';  // staging env 
+  // static const String odooApiKey =
+  //     'Fqnhq706WsVOMKi0t5KCs7zY_gg2yGsUSjIsQJoDlOiNngBgrPTLkUZAN4bhg6kp';  /// staging api key
+
   static const String odooBaseUrl =
-      'https://singleclic-singleclic-odoo-staging1-35615990.dev.odoo.com';
+      'https://singleclic.odoo.com';  // production env
   static const String odooApiKey =
-      'Fqnhq706WsVOMKi0t5KCs7zY_gg2yGsUSjIsQJoDlOiNngBgrPTLkUZAN4bhg6kp';
+      'AWuNebbOSNcZZfAA4srIfrVCeRg0SRWqS7VBiajQwcjzY2c6QPjTG8N1m98gMhfwNEKvagUTQtm6ulIHvro2v52HzAACWPMA3rGmFTbLSkjugmu0lRn2FfyeeSlhua2Q';  // production api key
   static const String leadEndpoint = '/api/v1/chatbot/lead';
   static const String defaultLeadText = "start chat";
 
